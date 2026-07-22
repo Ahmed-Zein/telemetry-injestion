@@ -11,6 +11,10 @@ class UserRepository {
     return this.users.find((user) => user.email === email);
   }
 
+  existsByEmail(email: string): boolean {
+    return !!this.users.find((user) => user.email === email);
+  }
+
   getUserById(id: number): User | undefined {
     return this.users.find((user) => user.id === id);
   }
