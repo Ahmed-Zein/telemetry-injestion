@@ -3,17 +3,17 @@ import {
   LoginRequest,
   RegisterRequest,
 } from "../dtos/auth.dto.js";
-import UserRepository from "../repositories/user.repository.js";
+import { IUserRepository } from "../repositories/user.repository.js";
 import { IHashService } from "./hash.service.js";
 import { IJwtService } from "./jwt.service.js";
 
 class UserService {
-  private userRepository: UserRepository;
+  private userRepository: IUserRepository;
   private hashService: IHashService;
   private jwtService: IJwtService;
 
   constructor(
-    userRepository: UserRepository,
+    userRepository: IUserRepository,
     hashService: IHashService,
     jwtService: IJwtService,
   ) {
@@ -46,7 +46,7 @@ class UserService {
     email: string,
     password: string,
   ): Promise<boolean> {
-    const user = this.userRepository.getUserByEmail(email);
+    const user = await this.userRepository.findByEmail(email);
     if (!user) {
       return false;
     }
@@ -67,7 +67,7 @@ class UserService {
     registerRequest: RegisterRequest,
   ): Promise<AuthResponse | undefined> {
     // TODO: Add validation logic here (e.g., check if the email is already registered, validate password strength, etc.)
-    const existingUser = this.userRepository.getUserByEmail(
+    const existingUser = await this.userRepository.findByEmail(
       registerRequest.email,
     );
 
@@ -76,8 +76,7 @@ class UserService {
     }
     const passwordHash = await this.hashService.hash(registerRequest.password);
 
-    this.userRepository.addUser({
-      id: Date.now(), // Simple unique ID generation
+    await this.userRepository.create({
       name: registerRequest.name,
       email: registerRequest.email,
       passwordHash,

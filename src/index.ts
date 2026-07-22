@@ -1,8 +1,11 @@
+import "dotenv/config";
+import { drizzle } from "drizzle-orm/node-postgres";
 import express, { type Request, type Response } from "express";
 import alertsRouter from "./routes/alerts.router.js";
 import authRouter from "./routes/auth.router.js";
 import devicesRouter from "./routes/devices.router.js";
 import { logger } from "./utils/logger.js";
+import { connectDB } from "./infra/db/db.context.js";
 
 const app = express();
 const PORT = Number(process.env.PORT) || 3000;
@@ -27,6 +30,7 @@ app.use((err: Error, req: Request, res: Response) => {
   res.status(500).json({ error: "Internal Server Error" });
 });
 
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
+  await connectDB();
   console.log(`Server running at http://localhost:${PORT}`);
 });

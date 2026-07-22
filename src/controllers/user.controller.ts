@@ -1,9 +1,9 @@
 import { NextFunction, Request, Response } from "express";
-import UserRepository from "../repositories/user.repository.js";
 import UserService from "../services/user.service.js";
 import { BcryptService } from "../services/hash.service.js";
 import { JwtService } from "../services/jwt.service.js";
 import { DefaultResponse } from "../utils/default.response.js";
+import { UserRepository } from "../repositories/user.repository.js";
 
 const userService = new UserService(
   new UserRepository(),

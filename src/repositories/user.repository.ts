@@ -1,22 +1,42 @@
-import User from "../models/user.model.js";
+import { eq } from "drizzle-orm";
+import { getDb } from "../infra/db/db.context.js";
+import { NewUser, User, usersTable } from "../infra/db/schema.js";
 
-class UserRepository {
-  private users: User[] = [];
+export interface IUserRepository {
+  findByEmail(email: string): Promise<User | undefined>;
+  findById(id: number): Promise<User | undefined>;
+  create(data: NewUser): Promise<User>;
+}
 
-  addUser(user: User): void {
-    this.users.push(user);
+export class UserRepository implements IUserRepository {
+  private get db() {
+    return getDb();
   }
 
-  getUserByEmail(email: string): User | undefined {
-    return this.users.find((user) => user.email === email);
+  async findByEmail(email: string): Promise<User | undefined> {
+    const result = await this.db
+      .select()
+      .from(usersTable)
+      .where(eq(usersTable.email, email))
+      .limit(1);
+
+    return result[0];
   }
 
-  existsByEmail(email: string): boolean {
-    return !!this.users.find((user) => user.email === email);
+  async findById(id: number): Promise<User | undefined> {
+    const result = await this.db
+      .select()
+      .from(usersTable)
+      .where(eq(usersTable.id, id))
+      .limit(1);
+
+    return result[0];
   }
 
-  getUserById(id: number): User | undefined {
-    return this.users.find((user) => user.id === id);
+  async create(data: NewUser): Promise<User> {
+    const result = await this.db.insert(usersTable).values(data).returning();
+
+    return result[0];
   }
 }
 
