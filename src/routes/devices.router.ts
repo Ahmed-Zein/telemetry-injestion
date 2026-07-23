@@ -1,8 +1,9 @@
 // cypod-telemetry
-import express from "express";
+import express, { Request, Response } from "express";
 import { JwtService } from "../services/jwt.service.js";
 import { createAuthMiddleware } from "../middlewares/auth.js";
 import { devicesController } from "../controllers/devices.controller.js";
+import { telemetryController } from "../controllers/telemetry.controller.js";
 
 const router = express.Router();
 
@@ -12,6 +13,9 @@ const authMiddleware = createAuthMiddleware(jwtService);
 // All device and telemetry routes require a valid token
 router.use(authMiddleware);
 
+router.get("/", devicesController.getAll);
+router.post("/", devicesController.create);
+
 /*
 ### [ ] Reads
 - `GET /devices/:id/latest` — served from cache when warm; on a miss, fall back to the
@@ -19,14 +23,12 @@ router.use(authMiddleware);
   ask you about this.
 - `GET /devices/:id/history?from=&to=` — paginated
 */
+// TODO: return paginated result
+router.get("/:id/history", telemetryController.getAll);
 
-router.get("/", devicesController.getAll);
-router.post("/", devicesController.create);
-
-router.get("/:id/latest", (req, res) => {});
-
-router.get("/:id/history", (req, res) => {
-  // Telemetry history retrieval logic here
+// TODO: Last step after adding the redis cache
+router.get("/:id/latest", (req: Request, res: Response) => {
+  res.status(404).json({ message: `${req.params}` });
 });
 
 /*
