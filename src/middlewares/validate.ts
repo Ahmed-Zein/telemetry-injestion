@@ -12,7 +12,7 @@ export const validate =
       const errorMessage = result.error.issues
         .map((issue) => `${issue.path.join(".")}: ${issue.message}`)
         .join(", ");
-      return next(new BadRequestError(errorMessage));
+      return next(new BadRequestError("error.validation_failed", { details: errorMessage }));
     }
 
     req.body = result.data;

@@ -38,7 +38,7 @@ export class TelemetryService implements ITelemetryService {
 
   async createMany(deviceId: number, data: NewTelemetry[]): Promise<Telemetry[]> {
     if (!data || data.length === 0) {
-      throw new BadRequestError("Telemetry payload cannot be empty");
+      throw new BadRequestError("telemetry.empty_payload");
     }
 
     const rowsToInsert = data.map((item) => ({
@@ -100,14 +100,12 @@ export class TelemetryService implements ITelemetryService {
 
     const date = new Date(value);
     if (isNaN(date.getTime())) {
-      throw new BadRequestError(`Invalid '${label}' date format: ${value}`);
+      throw new BadRequestError("telemetry.invalid_date", { label, value });
     }
 
     const year = date.getFullYear();
     if (year < 2000 || year > 2100) {
-      throw new BadRequestError(
-        `'${label}' date is out of reasonable range: ${value}`,
-      );
+      throw new BadRequestError("telemetry.date_out_of_range", { label, value });
     }
 
     return date;

@@ -5,6 +5,10 @@ import { connectDB } from "./infra/db/db.context.js";
 import { logger } from "./utils/logger.js";
 import cors from "cors";
 import apiRouter from "./routes/api.router.js";
+import { localeMiddleware } from "./middlewares/locale.js";
+import { DEFAULT_LOCALE, t } from "./i18n/index.js";
+import { AppError } from "./utils/error.js";
+import { DefaultResponse } from "./utils/default.response.js";
 
 const app = express();
 const PORT = Number(process.env.PORT) || 3000;
@@ -16,6 +20,7 @@ app.use(
 );
 
 app.use(express.json());
+app.use(localeMiddleware);
 app.use(apiRouter);
 
 app.get("/", (req: Request, res: Response) => {
@@ -23,13 +28,21 @@ app.get("/", (req: Request, res: Response) => {
 });
 
 app.use((req: Request, res: Response) => {
-  res.status(404).json({ error: `Route ${req.originalUrl} not found` });
+  const locale = req.locale || DEFAULT_LOCALE;
+  res.status(404).json(DefaultResponse.fail(t("error.route_not_found", locale, { url: req.originalUrl })));
 });
 
 app.use((err: Error, req: Request, res: Response, _: NextFunction) => {
-  // note: Add proper error handling here
+  const locale = req.locale || DEFAULT_LOCALE;
+
+  if (err instanceof AppError) {
+    const message = t(err.messageKey as any, locale, err.params);
+    res.status(err.statusCode).json(DefaultResponse.fail(message));
+    return;
+  }
+
   logger.error(err);
-  res.status(500).json({ error: "Internal Server Error" });
+  res.status(500).json(DefaultResponse.fail(t("error.internal_server", locale)));
 });
 
 app.listen(PORT, async () => {

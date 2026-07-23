@@ -9,9 +9,7 @@ export const createAuthMiddleware = (jwtService: IJwtService) => {
       const authHeader = req.headers.authorization;
 
       if (!authHeader || !authHeader.startsWith("Bearer ")) {
-        throw new AuthenticationError(
-          "Authentication failed: Token missing or malformed.",
-        );
+        throw new AuthenticationError("auth.token_missing");
       }
 
       const token = authHeader.split(" ")[1];
@@ -25,7 +23,7 @@ export const createAuthMiddleware = (jwtService: IJwtService) => {
       if (error instanceof AppError) {
         next(error);
       } else {
-        next(new AuthenticationError("Invalid or expired token."));
+        next(new AuthenticationError("auth.token_invalid"));
       }
     }
   };
