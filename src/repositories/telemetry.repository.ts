@@ -1,8 +1,7 @@
 // cypod-telemetry
-import { and, desc, eq, gte, lte, or } from "drizzle-orm";
+import { and, desc, eq, gte, lte } from "drizzle-orm";
 import { getDb } from "../infra/db/db.context.js";
-import { alertsTable, Telemetry, telemetryTable } from "../infra/db/schema.js";
-import { from } from "stream/iter";
+import { NewTelemetry, Telemetry, telemetryTable } from "../infra/db/schema.js";
 
 export interface ITelemetryRepository {
   getTelemetry(
@@ -10,6 +9,7 @@ export interface ITelemetryRepository {
     fromDate: Date | undefined,
     toDate: Date | undefined,
   ): Promise<Telemetry[]>;
+  create(data: NewTelemetry): Promise<Telemetry>;
 }
 
 export class TelemetryRepository implements ITelemetryRepository {
@@ -17,6 +17,9 @@ export class TelemetryRepository implements ITelemetryRepository {
     return getDb();
   }
 
+  create(data: NewTelemetry): Promise<Telemetry> {
+    throw new Error("Method not implemented.");
+  }
   public async getTelemetry(
     deviceId: number,
     fromDate: Date | undefined,

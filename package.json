@@ -8,8 +8,7 @@
     "build": "tsc",
     "start": "node dist/index.js",
     "type-check": "tsc --noEmit",
-    "db:generate": "drizzle-kit generate",
-    "db:migrate": "tsx src/db/migrate.ts",
+    "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio"
   },
   "keywords": [],
@@ -23,7 +22,8 @@
     "express": "^5.2.1",
     "jsonwebtoken": "^9.0.3",
     "pg": "^8.22.0",
-    "pino-http": "^11.0.0"
+    "pino-http": "^11.0.0",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@types/bcrypt": "^6.0.0",

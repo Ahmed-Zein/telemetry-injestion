@@ -4,6 +4,8 @@ import { JwtService } from "../services/jwt.service.js";
 import { createAuthMiddleware } from "../middlewares/auth.js";
 import { devicesController } from "../controllers/devices.controller.js";
 import { telemetryController } from "../controllers/telemetry.controller.js";
+import { validate } from "../middlewares/validate.js";
+import { telemetrySchema } from "../dtos/telemety.dto.js";
 
 const router = express.Router();
 
@@ -40,9 +42,10 @@ router.get("/:id/latest", (req: Request, res: Response) => {
 - Raise an alert when a reading crosses a threshold (e.g. battery below 15%, or
   temperature above a configurable maximum)
 */
-
-router.post("/:id/telemetry", (req, res) => {
-  // Telemetry ingestion logic here
-});
+router.post(
+  "/:id/telemetry",
+  validate(telemetrySchema),
+  telemetryController.create,
+);
 
 export default router;

@@ -1,4 +1,5 @@
 // cypod-telemetry
+import { TelemetryCreateRequest } from "../dtos/telemety.dto.js";
 import { Telemetry } from "../infra/db/schema.js";
 import { ITelemetryRepository } from "../repositories/telemetry.repository.js";
 import { BadRequestError } from "../utils/error.js";
@@ -9,12 +10,18 @@ export interface ITelemetryService {
     fromDate: string,
     toDate: string,
   ): Promise<Telemetry[]>;
+  create(deviceId: number, data: TelemetryCreateRequest): Promise<Telemetry>;
 }
 export class TelemetryService implements ITelemetryService {
   private telemetryRepository: ITelemetryRepository;
   constructor(telemetryRepository: ITelemetryRepository) {
     this.telemetryRepository = telemetryRepository;
   }
+
+  create(deviceId: number, data: TelemetryCreateRequest): Promise<Telemetry> {
+    throw new Error("Method not implemented.");
+  }
+
   async getAll(
     deviceId: number,
     from: string | undefined,
