@@ -23,9 +23,11 @@ docker compose up --build
 - Postgres: `localhost:5432` (user `admin`, db `cypod`)
 - Redis: `localhost:6379`
 
-On first boot the backend container runs `drizzle-kit push` before starting
+On first boot the backend container runs `drizzle-kit push` and db:seed before starting
 the server, so the schema is created automatically — no manual migration
 step needed.
+
+default username and password is: admin@cypod.com, 12345
 
 ---
 
