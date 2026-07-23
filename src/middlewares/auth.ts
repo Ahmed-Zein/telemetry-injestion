@@ -1,5 +1,5 @@
 // cypod-telemetry
-import { Request, Response, NextFunction } from "express";
+import { NextFunction, Request, Response } from "express";
 import { IJwtService } from "../services/jwt.service.js";
 import { AppError, AuthenticationError } from "../utils/error.js";
 

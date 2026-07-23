@@ -1,12 +1,13 @@
 // cypod-telemetry
 import {
-    doublePrecision,
-    index,
-    integer,
-    pgTable,
-    timestamp,
-    unique,
-    varchar,
+  boolean,
+  doublePrecision,
+  index,
+  integer,
+  pgTable,
+  timestamp,
+  unique,
+  varchar,
 } from "drizzle-orm/pg-core";
 
 export const usersTable = pgTable("users", {
@@ -75,13 +76,14 @@ export const alertsTable = pgTable("alerts", {
     .references(() => devicesTable.id, {
       onDelete: "cascade",
     }),
-  type: varchar("type", { length: 32 }).notNull(), // "LOW_BATTERY" | "HIGH_TEMPERATURE"
+  type: varchar("type", { length: 32 }).notNull(),
   message: varchar("message", { length: 255 }).notNull(),
   triggerValue: doublePrecision("trigger_value").notNull(),
   thresholdValue: doublePrecision("threshold_value").notNull(),
   triggeredAt: timestamp("triggered_at").notNull(), // note: this is the time stamp of the telemtery, decied to denormalize it for faster reads
+  active: boolean("active").default(true).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
-export type Alerts = typeof alertsTable.$inferSelect;
-export type NewAlerts = typeof alertsTable.$inferInsert;
+export type Alert = typeof alertsTable.$inferSelect;
+export type NewAlert = typeof alertsTable.$inferInsert;

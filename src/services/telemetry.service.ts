@@ -4,8 +4,8 @@ import { TelemetryCreateRequest } from "../dtos/telemety.dto.js";
 import { Telemetry } from "../infra/db/schema.js";
 import { IDevicesRepository } from "../repositories/devices.repository.js";
 import { ITelemetryRepository } from "../repositories/telemetry.repository.js";
+import { AlertTypes } from "../utils/alertytypes.js";
 import { BadRequestError } from "../utils/error.js";
-import { logger } from "../utils/logger.js";
 import { IAlertsService } from "./alerts.service.js";
 
 export interface ITelemetryService {
@@ -23,7 +23,7 @@ export class TelemetryService implements ITelemetryService {
     private telemetryRepository: ITelemetryRepository,
     private devicesRepository: IDevicesRepository,
     private alertsService: IAlertsService,
-  ) {}
+  ) { }
 
   async getLatest(deviceId: number): Promise<Telemetry> {
     return this.telemetryRepository.getLatest(deviceId);
@@ -43,10 +43,25 @@ export class TelemetryService implements ITelemetryService {
       timestamp: new Date(data.timestamp),
     });
     if (data.battery < alertThresholds.lowBatteryPercent) {
-      logger.info("BATTARY ALERT");
+      await this.alertsService.create({
+        deviceId: deviceId,
+        type: AlertTypes.LOW_BATTERY,
+        message: `Device Battery is low ${stored.battery} < ${alertThresholds.lowBatteryPercent}`,
+        triggerValue: stored.battery,
+        thresholdValue: alertThresholds.lowBatteryPercent,
+        triggeredAt: new Date(data.timestamp),
+      })
     }
+
     if (data.temperature > alertThresholds.highTemperatureCelsius) {
-      logger.info("TEMPRATURE ALERT");
+      await this.alertsService.create({
+        deviceId: deviceId,
+        type: AlertTypes.HIGH_TEMPERATURE,
+        message: `Device Tempreture is High ${stored.temperature} > ${alertThresholds.highTemperatureCelsius}`,
+        triggerValue: stored.temperature,
+        thresholdValue: alertThresholds.highTemperatureCelsius,
+        triggeredAt: new Date(data.timestamp),
+      })
     }
     return stored;
   }

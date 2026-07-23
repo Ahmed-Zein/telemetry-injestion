@@ -1,19 +1,21 @@
 // cypod-telemetry
-import { Alerts, NewAlerts } from "../infra/db/schema.js";
+import { Alert, NewAlert } from "../infra/db/schema.js";
 import { IAlertsRepository } from "../repositories/alertsRepository.js";
 
 export interface IAlertsService {
-  create(data: NewAlerts): Promise<Alerts>;
-  getActiveByUserId(userId: number): Promise<Alerts[]>;
+  create(data: NewAlert): Promise<Alert>;
+  getAllByUser(userId: number): Promise<Alert[]>;
 }
 
+// note: we still need cross tenant(user) checking
 export class AlertsService {
-  constructor(private alertsRepository: IAlertsRepository) {}
+  constructor(private alertsRepository: IAlertsRepository) { }
 
-  async create(data: NewAlerts): Promise<Alerts> {
-    throw new Error("Not Implmented");
+  async create(data: NewAlert): Promise<Alert> {
+    return await this.alertsRepository.create(data);
   }
-  async getActiveByUserId(userId: number): Promise<Alerts[]> {
-    throw new Error("Not Implmented");
+
+  async getAllByUser(userId: number): Promise<Alert[]> {
+    return await this.alertsRepository.getAllByUser(userId);
   }
 }

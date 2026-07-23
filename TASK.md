@@ -1,15 +1,14 @@
-
 ---
 
 ## 1. The scenario
 
 - You're building the first version of a device telemetry service for a fleet of IoT sensors.
-    Each device periodically sends a small payload 
-        `(battery %, temperature, GPS lat/lng, status)`.
+  Each device periodically sends a small payload
+  `(battery %, temperature, GPS lat/lng, status)`.
 
 - Your job is to build a service that ingests this data, stores it,
-caches the "latest known state" per device for fast dashboard reads, raises alerts when
-a device crosses a threshold, and a simple React dashboard to view it.
+  caches the "latest known state" per device for fast dashboard reads, raises alerts when
+  a device crosses a threshold, and a simple React dashboard to view it.
 
 ## 2. Tech stack
 
@@ -26,15 +25,18 @@ grade it.
 ## 3. Functional requirements
 
 ### [x] Auth
+
 - `POST /auth/register`, `POST /auth/login` → JWT-based auth
 - All device and telemetry routes require a valid token
 
 ### [ ] Devices
-- `POST /devices` — register a device (id, name, owner)
-- `GET /devices` — list devices belonging to the logged-in user
+
+- [x] `POST /devices` — register a device (id, name, owner)
+- [x] `GET /devices` — list devices belonging to the logged-in user
 
 ### [ ] Telemetry ingestion
-- `POST /devices/:id/telemetry` — accepts `{ battery, temperature, lat, lng, status, timestamp }`
+
+- [ ] `POST /devices/:id/telemetry` — accepts `{ battery, temperature, lat, lng, status, timestamp }`
 - Validate the payload before storing anything
 - Store the event
 - Update the cached "latest state" for that device, with a TTL
@@ -42,6 +44,7 @@ grade it.
   temperature above a configurable maximum)
 
 ### [ ] Reads
+
 - `GET /devices/:id/latest` — served from cache when warm; on a miss, fall back to the
   database and repopulate the cache. Log which path was hit (`HIT` / `MISS`) — we will
   ask you about this.
@@ -49,6 +52,7 @@ grade it.
 - `GET /alerts` — active alerts for the logged-in user's devices
 
 ### [ ] Frontend
+
 - Login screen
 - Device list showing latest status, polling every ~5s
 - Device detail view with recent history (a plain list is fine, charts not required)
@@ -60,6 +64,7 @@ grade it.
 ## 4. Non-functional requirements
 
 ### Security
+
 - Passwords hashed (bcrypt or argon2), never returned in any response
 - JWTs properly verified; expired tokens rejected
 - Input validation on every write endpoint — don't trust client payloads
@@ -69,6 +74,7 @@ grade it.
   flooding the API.
 
 ### Caching
+
 - Explain your TTL choice in the README and why you picked that number
 - A new telemetry event must update or invalidate the cached "latest" value
   **immediately** — not wait for the TTL to expire
@@ -76,6 +82,7 @@ grade it.
   Getting the code right matters more than the vocabulary.
 
 ### Database
+
 - At least one index you added deliberately, and one line on why
 - One paragraph: telemetry is high-volume and semi-structured, while devices, users and
   alerts are relational. If this system had to handle 50 million telemetry rows a day,
@@ -83,6 +90,7 @@ grade it.
   (Design answer only. Don't build it.)
 
 ### API design
+
 - Consistent error responses and status codes
 - No sensitive data or internal details leaked in error messages
 - Localized error messages: every endpoint reads a locale header (e.g. `Accept-Language`)
@@ -111,7 +119,7 @@ Both of these are requirements:
 1. A device may not post more than 10 readings per minute (section 4).
 2. A device that has been offline must not lose the readings it buffered while it was
    down. When it reconnects it will send them all at once, each carrying the timestamp
-   of when it was *recorded*, not when it was sent.
+   of when it was _recorded_, not when it was sent.
 
 Handle both. Explain in your README how you did it.
 

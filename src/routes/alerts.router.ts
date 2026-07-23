@@ -1,14 +1,12 @@
 // cypod-telemetry
 
 import express from "express";
+import { alertsController } from "../controllers/alerts.controller.js";
+import { createAuthMiddleware } from "../middlewares/auth.js";
+import { JwtService } from "../services/jwt.service.js";
 
 const router = express.Router();
-/*
-### [ ] Reads
-- `GET /alerts` — active alerts for the logged-in user's devices
-*/
-router.get("/", (req, res) => {
-  // Active alerts retrieval logic here
-});
+
+router.get("/", createAuthMiddleware(new JwtService()), alertsController.getAll);
 
 export default router;
