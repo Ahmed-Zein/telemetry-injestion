@@ -2,10 +2,13 @@
 import express from "express";
 import { devicesController } from "../controllers/devices.controller.js";
 import { telemetryController } from "../controllers/telemetry.controller.js";
+import { createDeviceSchema } from "../dtos/device.dto.js";
+import { telemetryHistoryQuerySchema } from "../dtos/telemetry.query.dto.js";
 import { telemetrySchema } from "../dtos/telemety.dto.js";
 import { createAuthMiddleware } from "../middlewares/auth.js";
 import { checkDeviceOwnership } from "../middlewares/deviceAuth.js";
 import { validate } from "../middlewares/validate.js";
+import { validateQuery } from "../middlewares/validateQuery.js";
 import { DevicesRepository } from "../repositories/devices.repository.js";
 import { JwtService } from "../services/jwt.service.js";
 
@@ -20,9 +23,9 @@ const deviceOwnership = checkDeviceOwnership(devicesRepository);
 router.use(authMiddleware);
 
 router.get("/", devicesController.getAll)
-  .post("/", devicesController.create);
+  .post("/", validate(createDeviceSchema), devicesController.create);
 
-router.get("/:id/history", deviceOwnership, telemetryController.getAll)
+router.get("/:id/history", deviceOwnership, validateQuery(telemetryHistoryQuerySchema), telemetryController.getAll)
   .get("/:id/latest", deviceOwnership, telemetryController.latest);
 
 router.post(

@@ -26,11 +26,12 @@ export const telemetryController = {
   async getAll(req: Request, res: Response, next: NextFunction) {
     try {
       const deviceId = Number(req.params.id);
-      const from = req.query.from as string | undefined;
-      const to = req.query.to as string | undefined;
-
-      const page = Math.max(1, Number(req.query.page) || 1);
-      const limit = Math.min(100, Math.max(1, Number(req.query.limit) || 20));
+      const { from, to, page, limit } = req.query as unknown as {
+        from?: string;
+        to?: string;
+        page: number;
+        limit: number;
+      };
 
       const result = await telemetryService.getAll(deviceId, from, to, page, limit);
 
