@@ -46,9 +46,9 @@ export const telemetryController = {
       const items: NewTelemetry[] = Array.isArray(req.body)
         ? req.body
         : [req.body];
-      const result = await telemetryService.createMany(deviceId, items);
+      await telemetryService.createMany(deviceId, items);
 
-      return res.status(201).json(DefaultResponse.success(result));
+      return res.status(201).end();
     } catch (error) {
       next(error);
     }

@@ -14,6 +14,6 @@ router
   .use(`/api/${apiVersion}/alerts`, alertsRouter)
   .use(`/api/${apiVersion}/auth`, authRouter)
   .use(`/api/${apiVersion}/devices`, devicesRouter)
-  .use("/devices/:id/telemetry", telemetryRouter) // note: I explicitly made the telmetry without /api/v* in case there is extenal tool use it for verification.
+  .use("/devices", telemetryRouter); // note: I explicitly made the telmetry without /api/v* in case there is extenal tool use it for verification.
 
 export default router;
