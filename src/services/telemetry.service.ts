@@ -4,7 +4,7 @@ import { NewTelemetry, Telemetry } from "../infra/db/schema.js";
 import { IDevicesRepository } from "../repositories/devices.repository.js";
 import { ITelemetryRepository } from "../repositories/telemetry.repository.js";
 import { AlertTypes } from "../utils/alertytypes.js";
-import { BadRequestError } from "../utils/error.js";
+import { BadRequestError, NotFoundError } from "../utils/error.js";
 import { PaginatedResult } from "../utils/paginated.response.js";
 import { IAlertsService } from "./alerts.service.js";
 import { ITelemetryCache } from "./telemetry.cache.service.js";
@@ -51,7 +51,15 @@ export class TelemetryService implements ITelemetryService {
       timestamp: new Date(item.timestamp),
     }));
 
-    const savedTelemetry = await this.telemetryRepository.createMany(rowsToInsert);
+    let savedTelemetry: Telemetry[];
+    try {
+      savedTelemetry = await this.telemetryRepository.createMany(rowsToInsert);
+    } catch (error) {
+      if (error instanceof Error && (error as any).code === "23503") {
+        throw new NotFoundError("device.not_found");
+      }
+      throw error;
+    }
 
     const tasks = [];
 
