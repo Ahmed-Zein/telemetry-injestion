@@ -9,7 +9,13 @@ function cacheKey(deviceId: number) {
   return `device:${deviceId}:latest`;
 }
 
-export const telemetryCache = {
+export interface ITelemetryCache {
+  get(deviceId: number): Promise<Telemetry | undefined>;
+  set(deviceId: number, latestState: Telemetry): Promise<void>;
+  invalidate(deviceId: number): Promise<void>;
+}
+
+export const telemetryCache: ITelemetryCache = {
   async get(deviceId: number): Promise<Telemetry | undefined> {
     const cached = await redis.get(cacheKey(deviceId));
     if (cached) {
@@ -33,3 +39,4 @@ export const telemetryCache = {
     await redis.del(cacheKey(deviceId));
   },
 };
+

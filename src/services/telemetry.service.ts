@@ -7,6 +7,7 @@ import { ITelemetryRepository } from "../repositories/telemetry.repository.js";
 import { AlertTypes } from "../utils/alertytypes.js";
 import { BadRequestError } from "../utils/error.js";
 import { IAlertsService } from "./alerts.service.js";
+import { ITelemetryCache } from "./telemetry.cache.service.js";
 
 export interface ITelemetryService {
   getAll(
@@ -23,6 +24,7 @@ export class TelemetryService implements ITelemetryService {
     private telemetryRepository: ITelemetryRepository,
     private devicesRepository: IDevicesRepository,
     private alertsService: IAlertsService,
+    private telemetryCache?: ITelemetryCache,
   ) { }
 
   async getLatest(deviceId: number): Promise<Telemetry> {
@@ -63,6 +65,8 @@ export class TelemetryService implements ITelemetryService {
         triggeredAt: new Date(data.timestamp),
       })
     }
+
+    await this.telemetryCache!.set(deviceId, stored);
     return stored;
   }
 
