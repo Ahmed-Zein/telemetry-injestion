@@ -1,0 +1,75 @@
+{
+  "app": {
+    "title": "تيليمتري سيبود"
+  },
+  "nav": {
+    "dashboard": "لوحة التحكم",
+    "alerts": "التنبيهات",
+    "logout": "تسجيل الخروج"
+  },
+  "auth": {
+    "login": "تسجيل الدخول",
+    "register": "التسجيل",
+    "name": "الاسم",
+    "email": "البريد الإلكتروني",
+    "password": "كلمة المرور",
+    "confirmPassword": "تأكيد كلمة المرور",
+    "loginTitle": "تسجيل الدخول",
+    "registerTitle": "إنشاء حساب",
+    "noAccount": "ليس لديك حساب؟",
+    "hasAccount": "لديك حساب بالفعل؟",
+    "loginButton": "تسجيل الدخول",
+    "registerButton": "إنشاء حساب",
+    "loginError": "البريد الإلكتروني أو كلمة المرور غير صحيحة",
+    "registerError": "فشل التسجيل"
+  },
+  "devices": {
+    "title": "أجهزتي",
+    "noDevices": "لم يتم العثور على أجهزة",
+    "addDevice": "إضافة جهاز",
+    "addDeviceTitle": "تسجيل جهاز جديد",
+    "deviceName": "اسم الجهاز",
+    "deviceNamePlaceholder": "مثال: مستشعر ألفا",
+    "addDeviceSuccess": "تم تسجيل الجهاز بنجاح",
+    "addDeviceError": "فشل تسجيل الجهاز",
+    "battery": "البطارية",
+    "temperature": "درجة الحرارة",
+    "lastSeen": "آخر ظهور",
+    "status": "الحالة",
+    "location": "الموقع",
+    "history": "السجل",
+    "back": "العودة للوحة التحكم",
+    "noTelemetry": "لا توجد بيانات تيليمتري بعد"
+  },
+  "alerts": {
+    "title": "التنبيهات",
+    "noAlerts": "لا توجد تنبيهات نشطة",
+    "batteryLow": "البطارية منخفضة بشكل حرج",
+    "tempHigh": "درجة الحرارة أعلى من الحد",
+    "deviceFault": "الجهاز يبلغ عن عطل",
+    "deviceOffline": "الجهاز غير متصل"
+  },
+  "common": {
+    "loading": "جارٍ التحميل...",
+    "error": "حدث خطأ",
+    "retry": "إعادة المحاولة",
+    "save": "حفظ",
+    "cancel": "إلغاء",
+    "confirm": "تأكيد",
+    "ok": "موافق",
+    "page": "صفحة",
+    "of": "من",
+    "from": "من",
+    "to": "إلى",
+    "previous": "السابق",
+    "next": "التالي",
+    "cacheHit": "الخزنة: HIT",
+    "cacheMiss": "الخزنة: MISS"
+  },
+  "validation": {
+    "required": "هذا الحقل مطلوب",
+    "invalidEmail": "البريد الإلكتروني غير صالح",
+    "passwordMin": "يجب أن تكون كلمة المرور 6 أحرف على الأقل",
+    "passwordMismatch": "كلمتا المرور غير متطابقتين"
+  }
+}

@@ -1,0 +1,75 @@
+{
+  "app": {
+    "title": "Cypod Telemetry"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "alerts": "Alerts",
+    "logout": "Logout"
+  },
+  "auth": {
+    "login": "Login",
+    "register": "Register",
+    "name": "Name",
+    "email": "Email",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "loginTitle": "Sign In",
+    "registerTitle": "Create Account",
+    "noAccount": "Don't have an account?",
+    "hasAccount": "Already have an account?",
+    "loginButton": "Sign In",
+    "registerButton": "Create Account",
+    "loginError": "Invalid email or password",
+    "registerError": "Registration failed"
+  },
+  "devices": {
+    "title": "My Devices",
+    "noDevices": "No devices found",
+    "addDevice": "Add Device",
+    "addDeviceTitle": "Register New Device",
+    "deviceName": "Device Name",
+    "deviceNamePlaceholder": "e.g. Sensor Alpha",
+    "addDeviceSuccess": "Device registered successfully",
+    "addDeviceError": "Failed to register device",
+    "battery": "Battery",
+    "temperature": "Temperature",
+    "lastSeen": "Last seen",
+    "status": "Status",
+    "location": "Location",
+    "history": "History",
+    "back": "Back to Dashboard",
+    "noTelemetry": "No telemetry data yet"
+  },
+  "alerts": {
+    "title": "Alerts",
+    "noAlerts": "No active alerts",
+    "batteryLow": "Battery critically low",
+    "tempHigh": "Temperature above threshold",
+    "deviceFault": "Device reporting fault",
+    "deviceOffline": "Device is offline"
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "retry": "Retry",
+    "save": "Save",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "ok": "OK",
+    "page": "Page",
+    "of": "of",
+    "from": "From",
+    "to": "To",
+    "previous": "Previous",
+    "next": "Next",
+    "cacheHit": "Cache: HIT",
+    "cacheMiss": "Cache: MISS"
+  },
+  "validation": {
+    "required": "This field is required",
+    "invalidEmail": "Invalid email address",
+    "passwordMin": "Password must be at least 6 characters",
+    "passwordMismatch": "Passwords do not match"
+  }
+}
