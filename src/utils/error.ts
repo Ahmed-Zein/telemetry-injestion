@@ -1,3 +1,4 @@
+// cypod-telemetry
 export class AppError extends Error {
   public readonly isOperational: boolean;
 

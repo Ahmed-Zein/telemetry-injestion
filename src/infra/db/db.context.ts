@@ -1,3 +1,4 @@
+// cypod-telemetry
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
 import { logger } from "../../utils/logger.js";
@@ -22,5 +23,5 @@ export const getDb = () => {
 };
 
 export const closeDB = async () => {
-  // TODO: later
+  // note: will review it later
 };

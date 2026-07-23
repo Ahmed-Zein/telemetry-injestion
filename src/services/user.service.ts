@@ -1,3 +1,4 @@
+// cypod-telemetry
 import {
   AuthResponse,
   LoginRequest,
@@ -70,7 +71,7 @@ class UserService {
   async registerUser(
     registerRequest: RegisterRequest,
   ): Promise<AuthResponse | undefined> {
-    // TODO: Add validation logic here (e.g., check if the email is already registered, validate password strength, etc.)
+    // note: Add validation logic here (e.g., check if the email is already registered, validate password strength, etc.)
     const existingUser = await this.userRepository.findByEmail(
       registerRequest.email,
     );

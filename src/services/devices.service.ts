@@ -1,7 +1,7 @@
+// cypod-telemetry
 import { Device, NewDevice } from "../infra/db/schema.js";
 import { IDevicesRepository } from "../repositories/devices.repository.js";
-import { IUserRepository } from "../repositories/user.repository.js";
-import { AppError, ConflictError } from "../utils/error.js";
+import { ConflictError } from "../utils/error.js";
 
 export interface IDevicesService {
   getAll(userId: number): Promise<Device[]>;

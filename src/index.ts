@@ -1,11 +1,11 @@
+// cypod-telemetry
 import "dotenv/config";
-import { drizzle } from "drizzle-orm/node-postgres";
 import express, { type Request, type Response } from "express";
+import { connectDB } from "./infra/db/db.context.js";
 import alertsRouter from "./routes/alerts.router.js";
 import authRouter from "./routes/auth.router.js";
 import devicesRouter from "./routes/devices.router.js";
 import { logger } from "./utils/logger.js";
-import { connectDB } from "./infra/db/db.context.js";
 
 const app = express();
 const PORT = Number(process.env.PORT) || 3000;

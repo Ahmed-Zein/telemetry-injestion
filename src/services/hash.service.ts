@@ -1,3 +1,4 @@
+// cypod-telemetry
 import bcrypt from "bcrypt";
 
 export interface IHashService {
@@ -9,6 +10,7 @@ export class BcryptService implements IHashService {
   private readonly saltRounds: number;
 
   constructor() {
+    // note: will be handled in the config later on
     this.saltRounds = 10;
   }
 

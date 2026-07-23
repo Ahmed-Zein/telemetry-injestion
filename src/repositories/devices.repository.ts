@@ -1,3 +1,4 @@
+// cypod-telemetry
 import { and, eq } from "drizzle-orm";
 import { getDb } from "../infra/db/db.context.js";
 import { Device, devicesTable, NewDevice } from "../infra/db/schema.js";

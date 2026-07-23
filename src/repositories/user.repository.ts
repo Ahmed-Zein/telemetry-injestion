@@ -1,3 +1,4 @@
+// cypod-telemetry
 import { eq } from "drizzle-orm";
 import { getDb } from "../infra/db/db.context.js";
 import { NewUser, User, usersTable } from "../infra/db/schema.js";
