@@ -31,6 +31,36 @@ services:
       timeout: 5s
       retries: 5
 
+  backend:
+    build: .
+    container_name: cypod_backend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    environment:
+      - DATABASE_URL=postgresql://admin:12345@postgres:5432/cypod
+      - REDIS_HOST=redis
+    volumes:
+      - ./src:/app/src
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  client:
+    build: ./client
+    container_name: cypod_client
+    restart: unless-stopped
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./client/src:/app/src
+    environment:
+      - VITE_API_URL=http://localhost:3000
+
 volumes:
   pgdata:
   redisdata:
