@@ -1,5 +1,5 @@
 // cypod-telemetry
-import { and, desc, eq, gte, lte } from "drizzle-orm";
+import { and, count, desc, eq, gte, lte } from "drizzle-orm";
 import { getDb } from "../infra/db/db.context.js";
 import { NewTelemetry, Telemetry, telemetryTable } from "../infra/db/schema.js";
 
@@ -8,7 +8,14 @@ export interface ITelemetryRepository {
     deviceId: number,
     fromDate: Date | undefined,
     toDate: Date | undefined,
+    limit: number,
+    offset: number,
   ): Promise<Telemetry[]>;
+  countTelemetry(
+    deviceId: number,
+    fromDate: Date | undefined,
+    toDate: Date | undefined,
+  ): Promise<number>;
   createMany(data: NewTelemetry[]): Promise<Telemetry[]>;
   getLatest(deviceId: number): Promise<Telemetry>;
 }
@@ -41,6 +48,8 @@ export class TelemetryRepository implements ITelemetryRepository {
     deviceId: number,
     fromDate: Date | undefined,
     toDate: Date | undefined,
+    limit: number,
+    offset: number,
   ): Promise<Telemetry[]> {
     const conditions = [eq(telemetryTable.deviceId, deviceId)];
 
@@ -51,8 +60,28 @@ export class TelemetryRepository implements ITelemetryRepository {
       .select()
       .from(telemetryTable)
       .where(and(...conditions))
-      .orderBy(desc(telemetryTable.timestamp));
+      .orderBy(desc(telemetryTable.timestamp))
+      .limit(limit)
+      .offset(offset);
 
     return result;
+  }
+
+  async countTelemetry(
+    deviceId: number,
+    fromDate: Date | undefined,
+    toDate: Date | undefined,
+  ): Promise<number> {
+    const conditions = [eq(telemetryTable.deviceId, deviceId)];
+
+    if (fromDate) conditions.push(gte(telemetryTable.timestamp, fromDate));
+    if (toDate) conditions.push(lte(telemetryTable.timestamp, toDate));
+
+    const [result] = await this.db
+      .select({ count: count() })
+      .from(telemetryTable)
+      .where(and(...conditions));
+
+    return Number(result.count);
   }
 }

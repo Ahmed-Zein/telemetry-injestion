@@ -1,7 +1,7 @@
 // cypod-telemetry
 
 export class PaginatedResult<T> {
-  data: T[];
+  items: T[];
   totalPages: number;
   pageNumber: number;
   pageSize: number;
@@ -9,12 +9,12 @@ export class PaginatedResult<T> {
   hasPrevious: boolean;
 
   constructor(
-    data: T[],
+    items: T[],
     totalPages: number,
     pageNumber: number,
     pageSize: number,
   ) {
-    this.data = data;
+    this.items = items;
     this.totalPages = totalPages;
     this.pageNumber = pageNumber;
     this.pageSize = pageSize;

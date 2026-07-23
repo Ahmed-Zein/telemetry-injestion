@@ -29,7 +29,10 @@ export const telemetryController = {
       const from = req.query.from as string | undefined;
       const to = req.query.to as string | undefined;
 
-      const result = await telemetryService.getAll(deviceId, from, to);
+      const page = Math.max(1, Number(req.query.page) || 1);
+      const limit = Math.min(100, Math.max(1, Number(req.query.limit) || 20));
+
+      const result = await telemetryService.getAll(deviceId, from, to, page, limit);
 
       return res.status(200).json(DefaultResponse.success(result));
     } catch (error) {

@@ -5,15 +5,18 @@ import { IDevicesRepository } from "../repositories/devices.repository.js";
 import { ITelemetryRepository } from "../repositories/telemetry.repository.js";
 import { AlertTypes } from "../utils/alertytypes.js";
 import { BadRequestError } from "../utils/error.js";
+import { PaginatedResult } from "../utils/paginated.response.js";
 import { IAlertsService } from "./alerts.service.js";
 import { ITelemetryCache } from "./telemetry.cache.service.js";
 
 export interface ITelemetryService {
   getAll(
     deviceId: number,
-    fromDate: string,
-    toDate: string,
-  ): Promise<Telemetry[]>;
+    fromDate: string | undefined,
+    toDate: string | undefined,
+    page: number,
+    limit: number,
+  ): Promise<PaginatedResult<Telemetry>>;
   createMany(
     deviceId: number,
     data: NewTelemetry[],
@@ -114,15 +117,21 @@ export class TelemetryService implements ITelemetryService {
     deviceId: number,
     from: string | undefined,
     to: string | undefined,
-  ): Promise<Telemetry[]> {
+    page: number,
+    limit: number,
+  ): Promise<PaginatedResult<Telemetry>> {
     const fromDate = this.validateDate(from, "from");
     const toDate = this.validateDate(to, "to");
 
-    const result = await this.telemetryRepository.getTelemetry(
-      deviceId,
-      fromDate,
-      toDate,
-    );
-    return result;
+    const offset = (page - 1) * limit;
+
+    const [data, total] = await Promise.all([
+      this.telemetryRepository.getTelemetry(deviceId, fromDate, toDate, limit, offset),
+      this.telemetryRepository.countTelemetry(deviceId, fromDate, toDate),
+    ]);
+
+    const totalPages = Math.ceil(total / limit);
+
+    return new PaginatedResult(data, totalPages, page, limit);
   }
 }
