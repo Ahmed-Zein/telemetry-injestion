@@ -33,6 +33,13 @@ export class NotFoundError extends AppError {
   }
 }
 
+export class ForbiddenError extends AppError {
+  constructor(message: string) {
+    super(message);
+    this.name = "ForbiddenError";
+  }
+}
+
 export class AuthenticationError extends AppError {
   constructor(message: string) {
     super(message);

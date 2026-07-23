@@ -1,6 +1,6 @@
 // cypod-telemetry
 import "dotenv/config";
-import express, { type Request, type Response } from "express";
+import express, { NextFunction, type Request, type Response } from "express";
 import { connectDB } from "./infra/db/db.context.js";
 import { logger } from "./utils/logger.js";
 import cors from "cors";
@@ -26,7 +26,7 @@ app.use((req: Request, res: Response) => {
   res.status(404).json({ error: `Route ${req.originalUrl} not found` });
 });
 
-app.use((err: Error, req: Request, res: Response) => {
+app.use((err: Error, req: Request, res: Response, _: NextFunction) => {
   // note: Add proper error handling here
   logger.error(err);
   res.status(500).json({ error: "Internal Server Error" });

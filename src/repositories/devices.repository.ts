@@ -7,6 +7,7 @@ export interface IDevicesRepository {
   findAllByUserId(userId: number): Promise<Device[]>;
   create(data: NewDevice): Promise<Device>;
   nameExists(name: string, userId: number): Promise<boolean>;
+  findById(id: number): Promise<Device | undefined>;
 }
 
 export class DevicesRepository implements IDevicesRepository {
@@ -35,5 +36,14 @@ export class DevicesRepository implements IDevicesRepository {
       .limit(1);
 
     return results.length > 0;
+  }
+
+  async findById(id: number): Promise<Device | undefined> {
+    const results = await this.db
+      .select()
+      .from(devicesTable)
+      .where(eq(devicesTable.id, id))
+      .limit(1);
+    return results[0];
   }
 }
