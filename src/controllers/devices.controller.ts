@@ -31,7 +31,7 @@ export const devicesController = {
 
       const data: NewDevice = {
         name,
-        userId: Number(req.user.id),
+        ownerId: Number(req.user.id),
       };
 
       const result = await devicesService.create(data);

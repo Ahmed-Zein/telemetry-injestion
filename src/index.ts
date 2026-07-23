@@ -25,7 +25,7 @@ app.use((req: Request, res: Response) => {
 });
 
 app.use((err: Error, req: Request, res: Response) => {
-  // TODO: Add proper error handling here
+  // note: Add proper error handling here
   logger.error(err);
   res.status(500).json({ error: "Internal Server Error" });
 });

@@ -5,6 +5,8 @@ import {
   varchar,
   timestamp,
   unique,
+  doublePrecision,
+  index,
 } from "drizzle-orm/pg-core";
 
 export const usersTable = pgTable("users", {
@@ -23,15 +25,63 @@ export const devicesTable = pgTable(
   {
     id: integer().primaryKey().generatedAlwaysAsIdentity(),
     name: varchar({ length: 255 }).notNull(),
-    userId: integer()
+    ownerId: integer()
       .notNull()
       .references(() => usersTable.id, {
         onDelete: "cascade",
       }),
     createdAt: timestamp("created_at").defaultNow().notNull(),
   },
-  (table) => [unique("user_device_name_unique").on(table.userId, table.name)],
+  (table) => [unique("user_device_name_unique").on(table.ownerId, table.name)],
 );
 
 export type Device = typeof devicesTable.$inferSelect;
 export type NewDevice = typeof devicesTable.$inferInsert;
+
+export const telemetryTable = pgTable(
+  "telemetry",
+  {
+    id: integer().primaryKey().generatedAlwaysAsIdentity(),
+    deviceId: integer()
+      .notNull()
+      .references(() => usersTable.id, {
+        onDelete: "cascade",
+      }),
+    battery: doublePrecision("battery").notNull(),
+    temperature: doublePrecision("temperature").notNull(),
+    lat: doublePrecision("lat").notNull(),
+    lng: doublePrecision("lng").notNull(),
+    status: varchar("status", { length: 64 }).notNull(),
+
+    // note: storing both the timestamp of the telemetry and the createdAt to migitate the out of order messages
+    timestamp: timestamp("timestamp").notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (table) => [
+    index("ix_telemetry_deviceId_timestamp_idx").on(
+      table.deviceId,
+      table.timestamp,
+    ),
+  ],
+);
+
+export type Telemetry = typeof telemetryTable.$inferSelect;
+export type NewTelemetry = typeof telemetryTable.$inferInsert;
+
+export const alertsTable = pgTable("alerts", {
+  id: integer().primaryKey().generatedAlwaysAsIdentity(),
+  deviceId: integer()
+    .notNull()
+    .references(() => usersTable.id, {
+      onDelete: "cascade",
+    }),
+  type: varchar("type", { length: 32 }).notNull(), // "LOW_BATTERY" | "HIGH_TEMPERATURE"
+  message: varchar("message", { length: 255 }).notNull(),
+  triggerValue: doublePrecision("trigger_value").notNull(),
+  thresholdValue: doublePrecision("threshold_value").notNull(),
+  triggeredAt: timestamp("triggered_at").notNull(), // note: this is the time stamp of the telemtery, decied to denormalize it for faster reads
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export type Alerts = typeof alertsTable.$inferSelect;
+export type NewAlerts = typeof alertsTable.$inferInsert;

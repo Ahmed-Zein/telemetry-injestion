@@ -18,7 +18,7 @@ export class DevicesRepository implements IDevicesRepository {
     const result = await this.db
       .select()
       .from(devicesTable)
-      .where(eq(devicesTable.userId, userId));
+      .where(eq(devicesTable.ownerId, userId));
 
     return result ?? [];
   }
@@ -31,7 +31,7 @@ export class DevicesRepository implements IDevicesRepository {
     const results = await this.db
       .select({ id: devicesTable.id })
       .from(devicesTable)
-      .where(and(eq(devicesTable.userId, userId), eq(devicesTable.name, name)))
+      .where(and(eq(devicesTable.ownerId, userId), eq(devicesTable.name, name)))
       .limit(1);
 
     return results.length > 0;

@@ -16,7 +16,7 @@ export class DevicesService implements IDevicesService {
   }
 
   async create(data: NewDevice): Promise<Device> {
-    if (await this.devicesRepository.nameExists(data.name, data.userId)) {
+    if (await this.devicesRepository.nameExists(data.name, data.ownerId)) {
       throw new ConflictError("Name already exists for this user");
     }
     const device = await this.devicesRepository.create(data);
