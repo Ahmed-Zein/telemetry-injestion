@@ -1,6 +1,14 @@
 import express from "express";
+import { JwtService } from "../services/jwt.service.js";
+import { createAuthMiddleware } from "../middlewares/auth.js";
 
 const router = express.Router();
+const jwtService = new JwtService();
+const authMiddleware = createAuthMiddleware(jwtService);
+
+// All device and telemetry routes require a valid token
+router.use(authMiddleware);
+
 /*
 ### [ ] Reads
 - `GET /devices/:id/latest` — served from cache when warm; on a miss, fall back to the

@@ -25,7 +25,7 @@ grade it.
 
 ## 3. Functional requirements
 
-### [ ] Auth
+### [x] Auth
 - `POST /auth/register`, `POST /auth/login` → JWT-based auth
 - All device and telemetry routes require a valid token
 
