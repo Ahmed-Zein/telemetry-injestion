@@ -56,6 +56,7 @@ export const telemetryTable = pgTable(
 
     // note: storing both the timestamp of the telemetry and the createdAt to migitate the out of order messages
     timestamp: timestamp("timestamp").notNull(),
+    isValid: boolean("is_valid").default(true).notNull(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
   },
   (table) => [

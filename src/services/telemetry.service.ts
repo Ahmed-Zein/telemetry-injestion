@@ -1,5 +1,6 @@
 // cypod-telemetry
 import { alertThresholds } from "../config/alertTrhresholds.js";
+import { telemetryConfig } from "../config/telemetry.config.js";
 import { NewTelemetry, Telemetry } from "../infra/db/schema.js";
 import { IDevicesRepository } from "../repositories/devices.repository.js";
 import { ITelemetryRepository } from "../repositories/telemetry.repository.js";
@@ -41,20 +42,42 @@ export class TelemetryService implements ITelemetryService {
       throw new BadRequestError("telemetry.empty_payload");
     }
 
-    const rowsToInsert = data.map((item) => ({
-      deviceId,
-      battery: item.battery,
-      temperature: item.temperature,
-      lat: item.lat,
-      lng: item.lng,
-      status: item.status,
-      timestamp: new Date(item.timestamp),
-    }));
+    const now = new Date();
+    const maxAgeMs = telemetryConfig.maxTimestampAgeDays * 24 * 60 * 60 * 1000;
+    const clockToleranceMs = 5 * 60 * 1000;
+
+    const rowsToInsert = data.map((item) => {
+      const ts = new Date(item.timestamp);
+      let isValid = true;
+
+      if (
+        item.temperature < telemetryConfig.minTemperature ||
+        item.temperature > telemetryConfig.maxTemperature
+      ) {
+        isValid = false;
+      }
+
+      if (ts.getTime() > now.getTime() + clockToleranceMs || now.getTime() - ts.getTime() > maxAgeMs) {
+        isValid = false;
+      }
+
+      return {
+        deviceId,
+        battery: item.battery,
+        temperature: item.temperature,
+        lat: item.lat,
+        lng: item.lng,
+        status: item.status,
+        timestamp: ts,
+        isValid,
+      };
+    });
 
     let savedTelemetry: Telemetry[];
     try {
       savedTelemetry = await this.telemetryRepository.createMany(rowsToInsert);
     } catch (error) {
+      // Postgres FK violation (23503) means deviceId doesn't exist
       if (error instanceof Error && (error as any).code === "23503") {
         throw new NotFoundError("device.not_found");
       }
@@ -63,7 +86,9 @@ export class TelemetryService implements ITelemetryService {
 
     const tasks = [];
 
-    for (let stored of savedTelemetry) {
+    for (const stored of savedTelemetry) {
+      if (!stored.isValid) continue;
+
       if (stored.battery < alertThresholds.lowBatteryPercent) {
         tasks.push(
           this.alertsService.create({
