@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { IJwtService } from "../services/jwt.service.js";
-import { AppError } from "../utils/error.js";
+import { AppError, AuthenticationError } from "../utils/error.js";
 
 export const createAuthMiddleware = (jwtService: IJwtService) => {
   return (req: Request, res: Response, next: NextFunction) => {
@@ -8,8 +8,7 @@ export const createAuthMiddleware = (jwtService: IJwtService) => {
       const authHeader = req.headers.authorization;
 
       if (!authHeader || !authHeader.startsWith("Bearer ")) {
-        throw new AppError(
-          401,
+        throw new AuthenticationError(
           "Authentication failed: Token missing or malformed.",
         );
       }
@@ -25,7 +24,7 @@ export const createAuthMiddleware = (jwtService: IJwtService) => {
       if (error instanceof AppError) {
         next(error);
       } else {
-        next(new AppError(401, "Invalid or expired token."));
+        next(new AuthenticationError("Invalid or expired token."));
       }
     }
   };

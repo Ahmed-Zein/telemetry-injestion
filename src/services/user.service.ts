@@ -3,6 +3,7 @@ import {
   LoginRequest,
   RegisterRequest,
 } from "../dtos/auth.dto.js";
+import { User } from "../infra/db/schema.js";
 import { IUserRepository } from "../repositories/user.repository.js";
 import { IHashService } from "./hash.service.js";
 import { IJwtService } from "./jwt.service.js";
@@ -25,16 +26,16 @@ class UserService {
   async loginUser(
     loginRequest: LoginRequest,
   ): Promise<AuthResponse | undefined> {
-    if (
-      (await this.checkValidCredentials(
-        loginRequest.email,
-        loginRequest.password,
-      )) === false
-    ) {
+    const user = await this.checkValidCredentials(
+      loginRequest.email,
+      loginRequest.password,
+    );
+    if (user === undefined) {
       return undefined;
     }
     const { accessToken, refreshToken } = this.generateTokens(
-      loginRequest.email,
+      user.id,
+      user.email,
     );
     return {
       token: accessToken,
@@ -45,21 +46,24 @@ class UserService {
   async checkValidCredentials(
     email: string,
     password: string,
-  ): Promise<boolean> {
+  ): Promise<User | undefined> {
     const user = await this.userRepository.findByEmail(email);
     if (!user) {
-      return false;
+      return user;
     }
     const isPasswordValid = await this.hashService.compare(
       password,
       user.passwordHash,
     );
-    return isPasswordValid;
+    return isPasswordValid ? user : undefined;
   }
 
-  generateTokens(email: string): { accessToken: string; refreshToken: string } {
-    const accessToken = this.jwtService.generateAccessToken({ email });
-    const refreshToken = this.jwtService.generateRefreshToken({ email });
+  generateTokens(
+    id: number,
+    email: string,
+  ): { accessToken: string; refreshToken: string } {
+    const accessToken = this.jwtService.generateAccessToken({ id, email });
+    const refreshToken = this.jwtService.generateRefreshToken({ id, email });
     return { accessToken, refreshToken };
   }
 
@@ -76,14 +80,15 @@ class UserService {
     }
     const passwordHash = await this.hashService.hash(registerRequest.password);
 
-    await this.userRepository.create({
+    const user = await this.userRepository.create({
       name: registerRequest.name,
       email: registerRequest.email,
       passwordHash,
     });
 
     const { accessToken, refreshToken } = this.generateTokens(
-      registerRequest.email,
+      user.id,
+      user.email,
     );
 
     return {

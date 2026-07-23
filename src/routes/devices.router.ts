@@ -1,8 +1,10 @@
 import express from "express";
 import { JwtService } from "../services/jwt.service.js";
 import { createAuthMiddleware } from "../middlewares/auth.js";
+import { devicesController } from "../controllers/devices.controller.js";
 
 const router = express.Router();
+
 const jwtService = new JwtService();
 const authMiddleware = createAuthMiddleware(jwtService);
 
@@ -17,9 +19,10 @@ router.use(authMiddleware);
 - `GET /devices/:id/history?from=&to=` — paginated
 */
 
-router.get("/:id/latest", (req, res) => {
-  // Latest telemetry retrieval logic here
-});
+router.get("/", devicesController.getAll);
+router.post("/", devicesController.create);
+
+router.get("/:id/latest", (req, res) => {});
 
 router.get("/:id/history", (req, res) => {
   // Telemetry history retrieval logic here
