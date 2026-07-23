@@ -1,11 +1,12 @@
 // cypod-telemetry
 
 import { Redis } from "ioredis";
+import { config } from "../../config/index.js";
 import { logger } from "../../utils/logger.js";
 
 export const redis = new Redis({
-  host: process.env.REDIS_HOST || "localhost",
-  port: Number(process.env.REDIS_PORT) || 6379,
+  host: config.redis.host,
+  port: config.redis.port,
 });
 
 redis.on("error", (err) => {

@@ -1,5 +1,6 @@
 // cypod-telemetry
 import bcrypt from "bcrypt";
+import { config } from "../config/index.js";
 
 export interface IHashService {
   hash(data: string): Promise<string>;
@@ -10,8 +11,7 @@ export class BcryptService implements IHashService {
   private readonly saltRounds: number;
 
   constructor() {
-    // note: will be handled in the config later on
-    this.saltRounds = 10;
+    this.saltRounds = config.bcrypt.saltRounds;
   }
 
   async hash(data: string): Promise<string> {

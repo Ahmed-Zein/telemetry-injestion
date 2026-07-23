@@ -1,6 +1,5 @@
 // cypod-telemetry
-import { alertThresholds } from "../config/alertTrhresholds.js";
-import { telemetryConfig } from "../config/telemetry.config.js";
+import { config } from "../config/index.js";
 import { NewTelemetry, Telemetry } from "../infra/db/schema.js";
 import { IDevicesRepository } from "../repositories/devices.repository.js";
 import { ITelemetryRepository } from "../repositories/telemetry.repository.js";
@@ -43,7 +42,7 @@ export class TelemetryService implements ITelemetryService {
     }
 
     const now = new Date();
-    const maxAgeMs = telemetryConfig.maxTimestampAgeDays * 24 * 60 * 60 * 1000;
+    const maxAgeMs = config.telemetry.maxTimestampAgeDays * 24 * 60 * 60 * 1000;
     const clockToleranceMs = 5 * 60 * 1000;
 
     const rowsToInsert = data.map((item) => {
@@ -51,8 +50,8 @@ export class TelemetryService implements ITelemetryService {
       let isValid = true;
 
       if (
-        item.temperature < telemetryConfig.minTemperature ||
-        item.temperature > telemetryConfig.maxTemperature
+        item.temperature < config.telemetry.minTemperature ||
+        item.temperature > config.telemetry.maxTemperature
       ) {
         isValid = false;
       }
@@ -77,7 +76,6 @@ export class TelemetryService implements ITelemetryService {
     try {
       savedTelemetry = await this.telemetryRepository.createMany(rowsToInsert);
     } catch (error) {
-      // Postgres FK violation (23503) means deviceId doesn't exist
       if (error instanceof Error && (error as any).code === "23503") {
         throw new NotFoundError("device.not_found");
       }
@@ -89,29 +87,29 @@ export class TelemetryService implements ITelemetryService {
     for (const stored of savedTelemetry) {
       if (!stored.isValid) continue;
 
-      if (stored.battery < alertThresholds.lowBatteryPercent) {
+      if (stored.battery < config.alerts.lowBatteryPercent) {
         tasks.push(
           this.alertsService.create({
             deviceId,
             telemetryId: stored.id,
             type: AlertTypes.LOW_BATTERY,
-            message: `Device battery low: ${stored.battery} < ${alertThresholds.lowBatteryPercent}`,
+            message: `Device battery low: ${stored.battery} < ${config.alerts.lowBatteryPercent}`,
             triggerValue: stored.battery,
-            thresholdValue: alertThresholds.lowBatteryPercent,
+            thresholdValue: config.alerts.lowBatteryPercent,
             triggeredAt: stored.timestamp,
           }),
         );
       }
 
-      if (stored.temperature > alertThresholds.highTemperatureCelsius) {
+      if (stored.temperature > config.alerts.highTemperatureCelsius) {
         tasks.push(
           this.alertsService.create({
             deviceId,
             telemetryId: stored.id,
             type: AlertTypes.HIGH_TEMPERATURE,
-            message: `Device temperature high: ${stored.temperature} > ${alertThresholds.highTemperatureCelsius}`,
+            message: `Device temperature high: ${stored.temperature} > ${config.alerts.highTemperatureCelsius}`,
             triggerValue: stored.temperature,
-            thresholdValue: alertThresholds.highTemperatureCelsius,
+            thresholdValue: config.alerts.highTemperatureCelsius,
             triggeredAt: stored.timestamp,
           }),
         );

@@ -9,13 +9,13 @@ import { localeMiddleware } from "./middlewares/locale.js";
 import { DEFAULT_LOCALE, t } from "./i18n/index.js";
 import { AppError } from "./utils/error.js";
 import { DefaultResponse } from "./utils/default.response.js";
+import { config } from "./config/index.js";
 
 const app = express();
-const PORT = Number(process.env.PORT) || 3000;
 
 app.use(
   cors({
-    origin: "http://localhost:5173", // note: move to config
+    origin: config.server.corsOrigin,
   }),
 );
 
@@ -45,7 +45,7 @@ app.use((err: Error, req: Request, res: Response, _: NextFunction) => {
   res.status(500).json(DefaultResponse.fail(t("error.internal_server", locale)));
 });
 
-app.listen(PORT, async () => {
+app.listen(config.server.port, async () => {
   await connectDB();
-  console.log(`Server running at http://localhost:${PORT}`);
+  logger.info(`Server running at port: ${config.server.port}`);
 });

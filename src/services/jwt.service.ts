@@ -1,10 +1,7 @@
 // cypod-telemetry
-import jwt, { SignOptions, JwtPayload } from "jsonwebtoken";
+import jwt, { SignOptions } from "jsonwebtoken";
+import { config } from "../config/index.js";
 import { AppJwtPayload } from "../types/express.js";
-
-// note: global config will be configured later on
-const VERY_SECURE_TOKEN = "VERY_SECURE_TOKEN";
-const VERY_SECURE_TOKEN_REFRESH = "VERY_SECURE_TOKEN_REFRESH";
 
 export interface IJwtService {
   generateAccessToken(payload: object): string;
@@ -16,23 +13,23 @@ export interface IJwtService {
 export class JwtService implements IJwtService {
   generateAccessToken(payload: AppJwtPayload): string {
     const options: SignOptions = {
-      expiresIn: "7d",
+      expiresIn: config.jwt.accessExpiresIn as SignOptions["expiresIn"],
     };
-    return jwt.sign(payload, VERY_SECURE_TOKEN, options);
+    return jwt.sign(payload, config.jwt.accessTokenSecret, options);
   }
 
   generateRefreshToken(payload: AppJwtPayload): string {
     const options: SignOptions = {
-      expiresIn: "30d",
+      expiresIn: config.jwt.refreshExpiresIn as SignOptions["expiresIn"],
     };
-    return jwt.sign(payload, VERY_SECURE_TOKEN_REFRESH, options);
+    return jwt.sign(payload, config.jwt.refreshTokenSecret, options);
   }
 
   verifyAccessToken(token: string): AppJwtPayload {
-    return jwt.verify(token, VERY_SECURE_TOKEN) as AppJwtPayload;
+    return jwt.verify(token, config.jwt.accessTokenSecret) as AppJwtPayload;
   }
 
   verifyRefreshToken(token: string): AppJwtPayload {
-    return jwt.verify(token, VERY_SECURE_TOKEN_REFRESH) as AppJwtPayload;
+    return jwt.verify(token, config.jwt.refreshTokenSecret) as AppJwtPayload;
   }
 }

@@ -1,6 +1,7 @@
 // cypod-telemetry
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
+import { config } from "../../config/index.js";
 import { logger } from "../../utils/logger.js";
 
 let dbClient: ReturnType<typeof drizzle> | null = null;
@@ -8,7 +9,7 @@ let dbClient: ReturnType<typeof drizzle> | null = null;
 export const connectDB = async () => {
   if (dbClient) return dbClient;
 
-  const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+  const pool = new Pool({ connectionString: config.database.url });
 
   dbClient = drizzle({ client: pool });
 
