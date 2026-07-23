@@ -9,7 +9,7 @@ export interface ITelemetryRepository {
     fromDate: Date | undefined,
     toDate: Date | undefined,
   ): Promise<Telemetry[]>;
-  create(data: NewTelemetry): Promise<Telemetry>;
+  createMany(data: NewTelemetry[]): Promise<Telemetry[]>;
   getLatest(deviceId: number): Promise<Telemetry>;
 }
 
@@ -28,12 +28,13 @@ export class TelemetryRepository implements ITelemetryRepository {
     return results[0];
   }
 
-  async create(data: NewTelemetry): Promise<Telemetry> {
-    const result = await this.db
+  async createMany(data: NewTelemetry[]): Promise<Telemetry[]> {
+    if (data.length === 0) return [];
+    const results = await this.db
       .insert(telemetryTable)
       .values(data)
       .returning();
-    return result[0];
+    return results;
   }
 
   public async getTelemetry(

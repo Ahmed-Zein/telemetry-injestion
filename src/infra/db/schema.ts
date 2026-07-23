@@ -76,6 +76,11 @@ export const alertsTable = pgTable("alerts", {
     .references(() => devicesTable.id, {
       onDelete: "cascade",
     }),
+  telemetryId: integer()
+    .notNull()
+    .references(() => telemetryTable.id, {
+      onDelete: "cascade",
+    }),
   type: varchar("type", { length: 32 }).notNull(),
   message: varchar("message", { length: 255 }).notNull(),
   triggerValue: doublePrecision("trigger_value").notNull(),

@@ -1,7 +1,6 @@
 // cypod-telemetry
 import { alertThresholds } from "../config/alertTrhresholds.js";
-import { TelemetryCreateRequest } from "../dtos/telemety.dto.js";
-import { Telemetry } from "../infra/db/schema.js";
+import { NewTelemetry, Telemetry } from "../infra/db/schema.js";
 import { IDevicesRepository } from "../repositories/devices.repository.js";
 import { ITelemetryRepository } from "../repositories/telemetry.repository.js";
 import { AlertTypes } from "../utils/alertytypes.js";
@@ -15,7 +14,10 @@ export interface ITelemetryService {
     fromDate: string,
     toDate: string,
   ): Promise<Telemetry[]>;
-  create(deviceId: number, data: TelemetryCreateRequest): Promise<Telemetry>;
+  createMany(
+    deviceId: number,
+    data: NewTelemetry[],
+  ): Promise<Telemetry[]>;
   getLatest(deviceId: number): Promise<Telemetry>;
 }
 
@@ -31,43 +33,60 @@ export class TelemetryService implements ITelemetryService {
     return this.telemetryRepository.getLatest(deviceId);
   }
 
-  async create(
-    deviceId: number,
-    data: TelemetryCreateRequest,
-  ): Promise<Telemetry> {
-    const stored = await this.telemetryRepository.create({
+  async createMany(deviceId: number, data: NewTelemetry[]): Promise<Telemetry[]> {
+    if (!data || data.length === 0) {
+      throw new BadRequestError("Telemetry payload cannot be empty");
+    }
+
+    const rowsToInsert = data.map((item) => ({
       deviceId,
-      battery: data.battery,
-      temperature: data.temperature,
-      lat: data.lat,
-      lng: data.lng,
-      status: data.status,
-      timestamp: new Date(data.timestamp),
-    });
-    if (data.battery < alertThresholds.lowBatteryPercent) {
-      await this.alertsService.create({
-        deviceId: deviceId,
-        type: AlertTypes.LOW_BATTERY,
-        message: `Device Battery is low ${stored.battery} < ${alertThresholds.lowBatteryPercent}`,
-        triggerValue: stored.battery,
-        thresholdValue: alertThresholds.lowBatteryPercent,
-        triggeredAt: new Date(data.timestamp),
-      })
+      battery: item.battery,
+      temperature: item.temperature,
+      lat: item.lat,
+      lng: item.lng,
+      status: item.status,
+      timestamp: new Date(item.timestamp),
+    }));
+
+    const savedTelemetry = await this.telemetryRepository.createMany(rowsToInsert);
+
+    const tasks = [];
+
+    for (let stored of savedTelemetry) {
+      if (stored.battery < alertThresholds.lowBatteryPercent) {
+        tasks.push(
+          this.alertsService.create({
+            deviceId,
+            telemetryId: stored.id,
+            type: AlertTypes.LOW_BATTERY,
+            message: `Device battery low: ${stored.battery} < ${alertThresholds.lowBatteryPercent}`,
+            triggerValue: stored.battery,
+            thresholdValue: alertThresholds.lowBatteryPercent,
+            triggeredAt: stored.timestamp,
+          }),
+        );
+      }
+
+      if (stored.temperature > alertThresholds.highTemperatureCelsius) {
+        tasks.push(
+          this.alertsService.create({
+            deviceId,
+            telemetryId: stored.id,
+            type: AlertTypes.HIGH_TEMPERATURE,
+            message: `Device temperature high: ${stored.temperature} > ${alertThresholds.highTemperatureCelsius}`,
+            triggerValue: stored.temperature,
+            thresholdValue: alertThresholds.highTemperatureCelsius,
+            triggeredAt: stored.timestamp,
+          }),
+        );
+      }
     }
 
-    if (data.temperature > alertThresholds.highTemperatureCelsius) {
-      await this.alertsService.create({
-        deviceId: deviceId,
-        type: AlertTypes.HIGH_TEMPERATURE,
-        message: `Device Tempreture is High ${stored.temperature} > ${alertThresholds.highTemperatureCelsius}`,
-        triggerValue: stored.temperature,
-        thresholdValue: alertThresholds.highTemperatureCelsius,
-        triggeredAt: new Date(data.timestamp),
-      })
-    }
+    tasks.push(this.telemetryCache?.invalidate(deviceId));
 
-    await this.telemetryCache!.set(deviceId, stored);
-    return stored;
+    await Promise.all(tasks);
+
+    return savedTelemetry;
   }
 
   private validateDate(

@@ -24,6 +24,7 @@ export class AlertsRepository implements IAlertsRepository {
       .select({
         id: alertsTable.id,
         deviceId: alertsTable.deviceId,
+        telemetryId: alertsTable.telemetryId,
         type: alertsTable.type,
         message: alertsTable.message,
         triggerValue: alertsTable.triggerValue,

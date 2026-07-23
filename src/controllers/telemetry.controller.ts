@@ -1,5 +1,6 @@
 // cypod-telemetry
 import { NextFunction, Request, Response } from "express";
+import { NewTelemetry } from "../infra/db/schema.js";
 import { AlertsRepository } from "../repositories/alertsRepository.js";
 import { DevicesRepository } from "../repositories/devices.repository.js";
 import { TelemetryRepository } from "../repositories/telemetry.repository.js";
@@ -51,7 +52,11 @@ export const telemetryController = {
       const deviceId = Number(req.params.id);
       if (isNaN(deviceId)) throw new BadRequestError("Invalid device id");
 
-      const result = await telemetryService.create(deviceId, req.body);
+      const items: NewTelemetry[] = Array.isArray(req.body)
+        ? req.body
+        : [req.body];
+      const result = await telemetryService.createMany(deviceId, items);
+
       return res.status(201).json(DefaultResponse.success(result));
     } catch (error) {
       next(error);

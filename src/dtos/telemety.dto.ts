@@ -1,7 +1,7 @@
 // cypod-telemetry
 import { z } from "zod";
 
-export const telemetrySchema = z.object({
+export const singleTelemetrySchema = z.object({
   battery: z.number().min(0).max(100),
   temperature: z.number(),
   // note: we can Geomety Objcect in the db with a spatial index, but for now we will use two separate fields for latitude and longitude
@@ -11,4 +11,13 @@ export const telemetrySchema = z.object({
   timestamp: z.iso.datetime(),
 });
 
-export type TelemetryCreateRequest = z.infer<typeof telemetrySchema>;
+export const telemetryIngestionSchema = z.union([
+  singleTelemetrySchema,
+  z.array(singleTelemetrySchema).min(1).max(500),
+]);
+
+export const telemetrySchema = telemetryIngestionSchema;
+
+export type TelemetryItemsRequest = z.infer<typeof telemetryIngestionSchema>;
+
+
