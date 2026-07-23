@@ -29,9 +29,7 @@ router.post("/", devicesController.create);
 router.get("/:id/history", telemetryController.getAll);
 
 // TODO: Last step after adding the redis cache
-router.get("/:id/latest", (req: Request, res: Response) => {
-  res.status(404).json({ message: `${req.params}` });
-});
+router.get("/:id/latest", telemetryController.latest);
 
 /*
 ### [ ] Telemetry ingestion

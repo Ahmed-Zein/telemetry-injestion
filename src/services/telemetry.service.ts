@@ -15,6 +15,7 @@ export interface ITelemetryService {
     toDate: string,
   ): Promise<Telemetry[]>;
   create(deviceId: number, data: TelemetryCreateRequest): Promise<Telemetry>;
+  getLatest(deviceId: number): Promise<Telemetry>;
 }
 
 export class TelemetryService implements ITelemetryService {
@@ -23,6 +24,11 @@ export class TelemetryService implements ITelemetryService {
     private devicesRepository: IDevicesRepository,
     private alertsService: IAlertsService,
   ) {}
+
+  async getLatest(deviceId: number): Promise<Telemetry> {
+    return this.telemetryRepository.getLatest(deviceId);
+  }
+
   async create(
     deviceId: number,
     data: TelemetryCreateRequest,
@@ -45,7 +51,10 @@ export class TelemetryService implements ITelemetryService {
     return stored;
   }
 
-  private validateDate(value: string | undefined, label: "from" | "to"): Date | undefined {
+  private validateDate(
+    value: string | undefined,
+    label: "from" | "to",
+  ): Date | undefined {
     if (!value) return undefined;
 
     const date = new Date(value);
@@ -55,7 +64,9 @@ export class TelemetryService implements ITelemetryService {
 
     const year = date.getFullYear();
     if (year < 2000 || year > 2100) {
-      throw new BadRequestError(`'${label}' date is out of reasonable range: ${value}`);
+      throw new BadRequestError(
+        `'${label}' date is out of reasonable range: ${value}`,
+      );
     }
 
     return date;

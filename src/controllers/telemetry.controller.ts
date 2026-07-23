@@ -3,6 +3,7 @@ import { AlertsRepository } from "../repositories/alertsRepository.js";
 import { DevicesRepository } from "../repositories/devices.repository.js";
 import { TelemetryRepository } from "../repositories/telemetry.repository.js";
 import { AlertsService } from "../services/alerts.service.js";
+import { telemetryCache } from "../services/telemetry.cache.service.js";
 import { TelemetryService } from "../services/telemetry.service.js";
 import { DefaultResponse } from "../utils/default.response.js";
 import { AuthenticationError, BadRequestError } from "../utils/error.js";
@@ -53,5 +54,19 @@ export const telemetryController = {
     } catch (error) {
       next(error);
     }
+  },
+
+  async latest(req: Request, res: Response, next: NextFunction) {
+    const deviceId = Number(req.params.id);
+    if (isNaN(deviceId)) throw new BadRequestError("Invalid device id");
+    const cacheTel = await telemetryCache.get(deviceId);
+    if (cacheTel !== undefined) {
+      return res.status(201).json(DefaultResponse.success(cacheTel));
+    }
+
+    const latestState = await telemetryService.getLatest(deviceId);
+    await telemetryCache.set(deviceId, latestState);
+
+    return res.status(200).json(DefaultResponse.success(latestState));
   },
 };

@@ -2,19 +2,21 @@
 import "dotenv/config";
 import express, { type Request, type Response } from "express";
 import { connectDB } from "./infra/db/db.context.js";
-import alertsRouter from "./routes/alerts.router.js";
-import authRouter from "./routes/auth.router.js";
-import devicesRouter from "./routes/devices.router.js";
 import { logger } from "./utils/logger.js";
+import cors from "cors";
+import apiRouter from "./routes/api.router.js";
 
 const app = express();
 const PORT = Number(process.env.PORT) || 3000;
 
-app.use(express.json());
+app.use(
+  cors({
+    origin: "http://localhost:5173", // note: move to config
+  }),
+);
 
-app.use("/alerts", alertsRouter);
-app.use("/auth", authRouter);
-app.use("/devices", devicesRouter);
+app.use(express.json());
+app.use(apiRouter);
 
 app.get("/", (req: Request, res: Response) => {
   res.json({ message: "Hello World" });

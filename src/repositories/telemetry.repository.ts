@@ -10,11 +10,22 @@ export interface ITelemetryRepository {
     toDate: Date | undefined,
   ): Promise<Telemetry[]>;
   create(data: NewTelemetry): Promise<Telemetry>;
+  getLatest(deviceId: number): Promise<Telemetry>;
 }
 
 export class TelemetryRepository implements ITelemetryRepository {
   private get db() {
     return getDb();
+  }
+
+  async getLatest(deviceId: number): Promise<Telemetry> {
+    const results = await this.db
+      .select()
+      .from(telemetryTable)
+      .where(eq(telemetryTable.deviceId, deviceId))
+      .orderBy(desc(telemetryTable.timestamp))
+      .limit(1);
+    return results[0];
   }
 
   async create(data: NewTelemetry): Promise<Telemetry> {
