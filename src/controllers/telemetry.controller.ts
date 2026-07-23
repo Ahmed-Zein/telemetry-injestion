@@ -25,7 +25,6 @@ const telemetryService = new TelemetryService(
 export const telemetryController = {
   async getAll(req: Request, res: Response, next: NextFunction) {
     try {
-      const deviceId = Number(req.params.id);
       const { from, to, page, limit } = req.query as unknown as {
         from?: string;
         to?: string;
@@ -33,7 +32,7 @@ export const telemetryController = {
         limit: number;
       };
 
-      const result = await telemetryService.getAll(deviceId, from, to, page, limit);
+      const result = await telemetryService.getAll(req.deviceId!, from, to, page, limit);
 
       return res.status(200).json(DefaultResponse.success(result));
     } catch (error) {
@@ -43,11 +42,10 @@ export const telemetryController = {
 
   async create(req: Request, res: Response, next: NextFunction) {
     try {
-      const deviceId = Number(req.params.id);
       const items: NewTelemetry[] = Array.isArray(req.body)
         ? req.body
         : [req.body];
-      await telemetryService.createMany(deviceId, items);
+      await telemetryService.createMany(req.deviceId!, items);
 
       return res.status(201).end();
     } catch (error) {
@@ -57,7 +55,7 @@ export const telemetryController = {
 
   async latest(req: Request, res: Response, next: NextFunction) {
     try {
-      const deviceId = Number(req.params.id);
+      const deviceId = req.deviceId!;
       const cacheTel = await telemetryCache.get(deviceId);
       if (cacheTel !== undefined) {
         return res.status(200).json(DefaultResponse.success(cacheTel));

@@ -15,7 +15,7 @@ export const slidingWindowRateLimit = (
 ) => {
   return async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const deviceId = req.params.id;
+      const deviceId = String(req.deviceId!);
       const now = Math.floor(Date.now() / 1000);
       const windowSize = config.windowSeconds;
       const currWindow = Math.floor(now / windowSize);

@@ -4,6 +4,7 @@ import { telemetryController } from "../controllers/telemetry.controller.js";
 import { telemetrySchema } from "../dtos/telemety.dto.js";
 import { slidingWindowRateLimit } from "../middlewares/rateLimit.js";
 import { validate } from "../middlewares/validate.js";
+import { validateId } from "../middlewares/validateId.js";
 import { redis } from "../infra/cache/redis.js";
 
 const router = express.Router();
@@ -15,6 +16,7 @@ const telemetryRateLimit = slidingWindowRateLimit(
 
 router.post(
     "/:id/telemetry",
+    validateId,
     telemetryRateLimit,
     validate(telemetrySchema),
     telemetryController.create,

@@ -7,6 +7,7 @@ import { telemetryHistoryQuerySchema } from "../dtos/telemetry.query.dto.js";
 import { telemetrySchema } from "../dtos/telemety.dto.js";
 import { createAuthMiddleware } from "../middlewares/auth.js";
 import { checkDeviceOwnership } from "../middlewares/deviceAuth.js";
+import { validateId } from "../middlewares/validateId.js";
 import { validate } from "../middlewares/validate.js";
 import { validateQuery } from "../middlewares/validateQuery.js";
 import { DevicesRepository } from "../repositories/devices.repository.js";
@@ -25,14 +26,7 @@ router.use(authMiddleware);
 router.get("/", devicesController.getAll)
   .post("/", validate(createDeviceSchema), devicesController.create);
 
-router.get("/:id/history", deviceOwnership, validateQuery(telemetryHistoryQuerySchema), telemetryController.getAll)
-  .get("/:id/latest", deviceOwnership, telemetryController.latest);
-
-router.post(
-  "/:id/telemetry",
-  deviceOwnership,
-  validate(telemetrySchema),
-  telemetryController.create,
-);
+router.get("/:id/history", validateId, deviceOwnership, validateQuery(telemetryHistoryQuerySchema), telemetryController.getAll)
+  .get("/:id/latest", validateId, deviceOwnership, telemetryController.latest);
 
 export default router;

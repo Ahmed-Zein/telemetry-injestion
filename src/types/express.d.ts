@@ -11,6 +11,7 @@ declare global {
     interface Request {
       user?: AppJwtPayload;
       device?: Device;
+      deviceId?: number;
       locale?: string;
     }
   }

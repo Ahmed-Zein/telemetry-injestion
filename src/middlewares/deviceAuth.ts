@@ -8,8 +8,7 @@ export const checkDeviceOwnership = (
 ): RequestHandler => {
   return async (req, res, next) => {
     try {
-      const deviceId = Number(req.params.id);
-      const device = await devicesRepository.findById(deviceId);
+      const device = await devicesRepository.findById(req.deviceId!);
 
       if (!device) {
         return next(new NotFoundError("device.not_found"));
