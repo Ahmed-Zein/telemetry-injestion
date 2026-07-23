@@ -17,9 +17,14 @@ export class TelemetryRepository implements ITelemetryRepository {
     return getDb();
   }
 
-  create(data: NewTelemetry): Promise<Telemetry> {
-    throw new Error("Method not implemented.");
+  async create(data: NewTelemetry): Promise<Telemetry> {
+    const result = await this.db
+      .insert(telemetryTable)
+      .values(data)
+      .returning();
+    return result[0];
   }
+
   public async getTelemetry(
     deviceId: number,
     fromDate: Date | undefined,

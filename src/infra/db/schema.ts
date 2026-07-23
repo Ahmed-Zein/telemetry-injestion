@@ -1,12 +1,12 @@
 // cypod-telemetry
 import {
-  integer,
-  pgTable,
-  varchar,
-  timestamp,
-  unique,
-  doublePrecision,
-  index,
+    doublePrecision,
+    index,
+    integer,
+    pgTable,
+    timestamp,
+    unique,
+    varchar,
 } from "drizzle-orm/pg-core";
 
 export const usersTable = pgTable("users", {
@@ -44,7 +44,7 @@ export const telemetryTable = pgTable(
     id: integer().primaryKey().generatedAlwaysAsIdentity(),
     deviceId: integer()
       .notNull()
-      .references(() => usersTable.id, {
+      .references(() => devicesTable.id, {
         onDelete: "cascade",
       }),
     battery: doublePrecision("battery").notNull(),
@@ -72,7 +72,7 @@ export const alertsTable = pgTable("alerts", {
   id: integer().primaryKey().generatedAlwaysAsIdentity(),
   deviceId: integer()
     .notNull()
-    .references(() => usersTable.id, {
+    .references(() => devicesTable.id, {
       onDelete: "cascade",
     }),
   type: varchar("type", { length: 32 }).notNull(), // "LOW_BATTERY" | "HIGH_TEMPERATURE"
