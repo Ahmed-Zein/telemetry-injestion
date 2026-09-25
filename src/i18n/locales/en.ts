@@ -24,5 +24,8 @@ export const en = {
   "success.default": "Request successful",
   "error.route_not_found": "Route {url} not found",
   "error.internal_server": "Internal Server Error",
-  "error.validation_failed": "Validation failed",
+  "error.validation_failed": "Validation failed: {details}",
+  "error.payload_too_large": "Request body is larger than the {limit} limit. Send a smaller batch.",
+  "error.malformed_json": "Request body is not valid JSON",
+  "error.rate_limited": "Rate limit exceeded: at most {limit} requests per window. Retry in {retryAfter}s.",
 } as const;

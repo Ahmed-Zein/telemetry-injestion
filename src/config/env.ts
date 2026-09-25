@@ -27,6 +27,7 @@ export const config = {
   server: {
     port: numberEnv("PORT", 3000),
     corsOrigin: optionalEnv("CORS_ORIGIN", "http://localhost:5173"),
+    jsonBodyLimit: optionalEnv("JSON_BODY_LIMIT", "2mb"),
   },
   database: {
     url: requireEnv("DATABASE_URL"),
@@ -48,6 +49,7 @@ export const config = {
     minTemperature: numberEnv("TEMPERATURE_MIN", 0),
     maxTemperature: numberEnv("TEMPERATURE_MAX", 100),
     maxTimestampAgeDays: numberEnv("TIMESTAMP_MAX_AGE_DAYS", 30),
+    maxBatchSize: numberEnv("TELEMETRY_MAX_BATCH_SIZE", 500),
   },
   alerts: {
     lowBatteryPercent: numberEnv("LOW_BATTERY_THRESHOLD", 15),

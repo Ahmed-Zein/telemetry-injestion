@@ -55,6 +55,21 @@ runs over the whole array at once, so **one malformed reading fails the
 entire batch it was sent in**, not just that reading. 
 This is a real limitation — a production version would probably validate
 per-item and return a partial-success response instead of all-or-nothing.
+
+**Batch limits.** The cap is `TELEMETRY_MAX_BATCH_SIZE` (default 500), enforced
+on three levels in this order:
+
+1. **Body size** — `JSON_BODY_LIMIT` (default `2mb`). A body over the limit is
+   rejected with `413` and a localized body. It is set well above the worst
+   case of a full batch (~190 bytes per validated reading, so 500 readings
+   ≈ 93 KB) precisely so a *legal* full batch is never refused by the
+   transport before Zod sees it.
+2. **Item count** — more than 500 items is `400`, and the message says what to
+   do: `at most 500 readings per request — split larger batches into chunks of
+   500 or fewer`. The server never splits a batch for the client.
+
+The server does **not** chunk, reorder, or partially accept. A device that
+buffered readings while offline has to split them client-side.
 ---
 
 ## 3. Reconciling the rate limit with offline-buffered readings
@@ -79,6 +94,15 @@ device misbehaving doesn't affect another device's budget. On a Redis error,
 the limiter fails open (logs the error and lets the request through) rather
 than blocking telemetry ingestion because a cache went down — losing rate-limit
 enforcement briefly is a better failure mode than losing real device data.
+
+The limiter counts a request only once it has passed validation. It sits
+*after* the Zod middleware on purpose: since it increments on every request it
+admits, running it first meant a device retrying an over-sized batch spent its
+entire 10/minute budget on requests that stored nothing and then met a `429`.
+Rejected payloads now cost a Zod parse and nothing else. The trade-off is that
+malformed payloads are no longer throttled before that parse, which is bounded
+by the 2mb body limit. A `429` returns a localized body and the
+`X-RateLimit-*` headers rather than an empty response.
 
 Separately, each stored reading keeps both its own `timestamp` (when the
 device recorded it) and `createdAt` (when the row was inserted). Alerts use

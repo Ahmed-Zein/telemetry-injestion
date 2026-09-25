@@ -57,3 +57,10 @@ export class ConflictError extends AppError {
     this.name = "ConflictError";
   }
 }
+
+export class PayloadTooLargeError extends AppError {
+  constructor(limit: string) {
+    super("error.payload_too_large", { limit }, 413);
+    this.name = "PayloadTooLargeError";
+  }
+}

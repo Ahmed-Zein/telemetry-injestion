@@ -1,5 +1,8 @@
 // cypod-telemetry
 import { z } from "zod";
+import { config } from "../config/index.js";
+
+const MAX_BATCH_SIZE = config.telemetry.maxBatchSize;
 
 export const singleTelemetrySchema = z.object({
   battery: z.number().min(0).max(100),
@@ -13,7 +16,13 @@ export const singleTelemetrySchema = z.object({
 
 export const telemetryIngestionSchema = z.union([
   singleTelemetrySchema,
-  z.array(singleTelemetrySchema).min(1).max(500),
+  z
+    .array(singleTelemetrySchema)
+    .min(1, "at least 1 reading is required")
+    .max(
+      MAX_BATCH_SIZE,
+      `at most ${MAX_BATCH_SIZE} readings per request — split larger batches into chunks of ${MAX_BATCH_SIZE} or fewer`,
+    ),
 ]);
 
 export const telemetrySchema = telemetryIngestionSchema;

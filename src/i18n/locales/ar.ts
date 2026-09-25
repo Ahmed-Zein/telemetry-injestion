@@ -17,5 +17,8 @@ export const ar: Record<keyof typeof en, string> = {
   "success.default": "تمت العملية بنجاح.",
   "error.route_not_found": "لم يتم العثور على المسار: {url}",
   "error.internal_server": "حدث خطأ داخلي في الخادم.",
-  "error.validation_failed": "فشل في التحقق من صحة البيانات المُدخلة.",
+  "error.validation_failed": "فشل في التحقق من صحة البيانات المُدخلة: {details}",
+  "error.payload_too_large": "حجم الطلب أكبر من الحد المسموح ({limit}). أرسل دفعة أصغر.",
+  "error.malformed_json": "جسم الطلب ليس بصيغة JSON صالحة.",
+  "error.rate_limited": "تم تجاوز حد الطلبات: {limit} طلبات كحد أقصى لكل نافذة. أعد المحاولة بعد {retryAfter} ثانية.",
 };

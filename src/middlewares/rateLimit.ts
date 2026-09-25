@@ -1,6 +1,8 @@
 // cypod-telemetry
 import { NextFunction, Request, Response } from "express";
 import type { Redis } from "ioredis";
+import { resolveLocale, t } from "../i18n/index.js";
+import { DefaultResponse } from "../utils/default.response.js";
 import { logger } from "../utils/logger.js";
 
 export interface SlidingWindowConfig {
@@ -47,7 +49,14 @@ export const slidingWindowRateLimit = (
       res.setHeader("X-RateLimit-Reset", resetSeconds);
 
       if (estimated >= config.maxRequests) {
-        res.status(429).end();
+        res.status(429).json(
+          DefaultResponse.fail(
+            t("error.rate_limited", resolveLocale(req), {
+              limit: config.maxRequests,
+              retryAfter: resetSeconds,
+            }),
+          ),
+        );
         return;
       }
 

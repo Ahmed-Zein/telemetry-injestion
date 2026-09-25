@@ -19,7 +19,7 @@ app.use(
   }),
 );
 
-app.use(express.json());
+app.use(express.json({ limit: config.server.jsonBodyLimit }));
 app.use(localeMiddleware);
 app.use(apiRouter);
 
@@ -38,6 +38,16 @@ app.use((err: Error, req: Request, res: Response, _: NextFunction) => {
   if (err instanceof AppError) {
     const message = t(err.messageKey as any, locale, err.params);
     res.status(err.statusCode).json(DefaultResponse.fail(message));
+    return;
+  }
+
+  const bodyParserError = err as Error & { type?: string };
+  if (bodyParserError.type === "entity.too.large") {
+    res.status(413).json(DefaultResponse.fail(t("error.payload_too_large", locale, { limit: config.server.jsonBodyLimit })));
+    return;
+  }
+  if (bodyParserError.type === "entity.parse.failed") {
+    res.status(400).json(DefaultResponse.fail(t("error.malformed_json", locale)));
     return;
   }
 

@@ -3,3 +3,6 @@ dist
 .env
 *.log
 drizzle/
+tests/
+client/node_modules
+client/dist
