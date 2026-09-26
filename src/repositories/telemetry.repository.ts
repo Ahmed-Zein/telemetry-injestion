@@ -3,6 +3,11 @@ import { and, count, desc, eq, gte, lte } from "drizzle-orm";
 import { getDb } from "../infra/db/db.context.js";
 import { NewTelemetry, Telemetry, telemetryTable } from "../infra/db/schema.js";
 
+export interface ITelemetryInsertResult {
+  inserted: Telemetry[];
+  duplicates: number;
+}
+
 export interface ITelemetryRepository {
   getTelemetry(
     deviceId: number,
@@ -16,7 +21,7 @@ export interface ITelemetryRepository {
     fromDate: Date | undefined,
     toDate: Date | undefined,
   ): Promise<number>;
-  createMany(data: NewTelemetry[]): Promise<Telemetry[]>;
+  createMany(data: NewTelemetry[]): Promise<ITelemetryInsertResult>;
   getLatest(deviceId: number): Promise<Telemetry>;
 }
 
@@ -35,13 +40,19 @@ export class TelemetryRepository implements ITelemetryRepository {
     return results[0];
   }
 
-  async createMany(data: NewTelemetry[]): Promise<Telemetry[]> {
-    if (data.length === 0) return [];
-    const results = await this.db
+  async createMany(data: NewTelemetry[]): Promise<ITelemetryInsertResult> {
+    if (data.length === 0) return { inserted: [], duplicates: 0 };
+
+    const inserted = await this.db
       .insert(telemetryTable)
       .values(data)
+      // note: device sedning same telemetry device twice is ignore, first one is taken.
+      .onConflictDoNothing({
+        target: [telemetryTable.deviceId, telemetryTable.timestamp],
+      })
       .returning();
-    return results;
+
+    return { inserted, duplicates: data.length - inserted.length };
   }
 
   public async getTelemetry(

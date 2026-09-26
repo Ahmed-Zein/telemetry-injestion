@@ -32,7 +32,13 @@ export const telemetryController = {
         limit: number;
       };
 
-      const result = await telemetryService.getAll(req.deviceId!, from, to, page, limit);
+      const result = await telemetryService.getAll(
+        req.deviceId!,
+        from,
+        to,
+        page,
+        limit,
+      );
 
       return res.status(200).json(DefaultResponse.success(result));
     } catch (error) {
@@ -45,9 +51,9 @@ export const telemetryController = {
       const items: NewTelemetry[] = Array.isArray(req.body)
         ? req.body
         : [req.body];
-      await telemetryService.createMany(req.deviceId!, items);
+      const result = await telemetryService.createMany(req.deviceId!, items);
 
-      return res.status(201).end();
+      return res.status(201).json(DefaultResponse.success(result));
     } catch (error) {
       next(error);
     }

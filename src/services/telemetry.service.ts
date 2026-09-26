@@ -9,6 +9,12 @@ import { PaginatedResult } from "../utils/paginated.response.js";
 import { IAlertsService } from "./alerts.service.js";
 import { ITelemetryCache } from "./telemetry.cache.service.js";
 
+export interface ITelemetryIngestResult {
+  accepted: number;
+  duplicates: number;
+  alertsRaised: number;
+}
+
 export interface ITelemetryService {
   getAll(
     deviceId: number,
@@ -20,7 +26,7 @@ export interface ITelemetryService {
   createMany(
     deviceId: number,
     data: NewTelemetry[],
-  ): Promise<Telemetry[]>;
+  ): Promise<ITelemetryIngestResult>;
   getLatest(deviceId: number): Promise<Telemetry>;
 }
 
@@ -30,13 +36,16 @@ export class TelemetryService implements ITelemetryService {
     private devicesRepository: IDevicesRepository,
     private alertsService: IAlertsService,
     private telemetryCache?: ITelemetryCache,
-  ) { }
+  ) {}
 
   async getLatest(deviceId: number): Promise<Telemetry> {
     return this.telemetryRepository.getLatest(deviceId);
   }
 
-  async createMany(deviceId: number, data: NewTelemetry[]): Promise<Telemetry[]> {
+  async createMany(
+    deviceId: number,
+    data: NewTelemetry[],
+  ): Promise<ITelemetryIngestResult> {
     if (!data || data.length === 0) {
       throw new BadRequestError("telemetry.empty_payload");
     }
@@ -56,7 +65,10 @@ export class TelemetryService implements ITelemetryService {
         isValid = false;
       }
 
-      if (ts.getTime() > now.getTime() + clockToleranceMs || now.getTime() - ts.getTime() > maxAgeMs) {
+      if (
+        ts.getTime() > now.getTime() + clockToleranceMs ||
+        now.getTime() - ts.getTime() > maxAgeMs
+      ) {
         isValid = false;
       }
 
@@ -72,9 +84,12 @@ export class TelemetryService implements ITelemetryService {
       };
     });
 
-    let savedTelemetry: Telemetry[];
+    let inserted: Telemetry[];
+    let duplicates: number;
     try {
-      savedTelemetry = await this.telemetryRepository.createMany(rowsToInsert);
+      const result = await this.telemetryRepository.createMany(rowsToInsert);
+      inserted = result.inserted;
+      duplicates = result.duplicates;
     } catch (error) {
       if (error instanceof Error && (error as any).code === "23503") {
         throw new NotFoundError("device.not_found");
@@ -83,11 +98,16 @@ export class TelemetryService implements ITelemetryService {
     }
 
     const tasks = [];
+    let alertsRaised = 0;
 
-    for (const stored of savedTelemetry) {
+    // note: only the rows Postgres actually wrote are considered here, so a replayed reading
+    // that collided on (deviceId, timestamp) can never raise a second alert for a condition
+    // that has already been reported.
+    for (const stored of inserted) {
       if (!stored.isValid) continue;
 
       if (stored.battery < config.alerts.lowBatteryPercent) {
+        alertsRaised += 1;
         tasks.push(
           this.alertsService.create({
             deviceId,
@@ -102,6 +122,7 @@ export class TelemetryService implements ITelemetryService {
       }
 
       if (stored.temperature > config.alerts.highTemperatureCelsius) {
+        alertsRaised += 1;
         tasks.push(
           this.alertsService.create({
             deviceId,
@@ -116,11 +137,13 @@ export class TelemetryService implements ITelemetryService {
       }
     }
 
-    tasks.push(this.telemetryCache?.invalidate(deviceId));
+    if (inserted.length > 0) {
+      tasks.push(this.telemetryCache?.invalidate(deviceId));
+    }
 
     await Promise.all(tasks);
 
-    return savedTelemetry;
+    return { accepted: inserted.length, duplicates, alertsRaised };
   }
 
   private validateDate(
@@ -136,7 +159,10 @@ export class TelemetryService implements ITelemetryService {
 
     const year = date.getFullYear();
     if (year < 2000 || year > 2100) {
-      throw new BadRequestError("telemetry.date_out_of_range", { label, value });
+      throw new BadRequestError("telemetry.date_out_of_range", {
+        label,
+        value,
+      });
     }
 
     return date;
@@ -155,7 +181,13 @@ export class TelemetryService implements ITelemetryService {
     const offset = (page - 1) * limit;
 
     const [data, total] = await Promise.all([
-      this.telemetryRepository.getTelemetry(deviceId, fromDate, toDate, limit, offset),
+      this.telemetryRepository.getTelemetry(
+        deviceId,
+        fromDate,
+        toDate,
+        limit,
+        offset,
+      ),
       this.telemetryRepository.countTelemetry(deviceId, fromDate, toDate),
     ]);
 

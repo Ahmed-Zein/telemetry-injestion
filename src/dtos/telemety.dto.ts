@@ -11,7 +11,9 @@ export const singleTelemetrySchema = z.object({
   lat: z.number().min(-90).max(90),
   lng: z.number().min(-180).max(180),
   status: z.string().min(1).max(64),
-  timestamp: z.iso.datetime(),
+  timestamp: z.iso.datetime().refine((val) => new Date(val) <= new Date(), {
+    message: "Timestamp cannont be in the future",
+  }),
 });
 
 export const telemetryIngestionSchema = z.union([

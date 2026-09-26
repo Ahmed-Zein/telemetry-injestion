@@ -2,7 +2,6 @@
 import {
   boolean,
   doublePrecision,
-  index,
   integer,
   pgTable,
   timestamp,
@@ -60,7 +59,8 @@ export const telemetryTable = pgTable(
     createdAt: timestamp("created_at").defaultNow().notNull(),
   },
   (table) => [
-    index("ix_telemetry_deviceId_timestamp_idx").on(
+    // note: the UNIQUE constraint to dedub telementry.
+    unique("uq_telemetry_deviceId_timestamp").on(
       table.deviceId,
       table.timestamp,
     ),
